@@ -22,25 +22,38 @@ const adminTabs = [
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [authorized, setAuthorized] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function checkAdmin() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { window.location.href = '/login'; return }
+    // Wait for Supabase to restore session from cookies before checking
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!session) {
+          // No session after auth is ready → not logged in
+          if (event === 'INITIAL_SESSION' || event === 'SIGNED_OUT') {
+            window.location.href = '/login'
+          }
+          return
+        }
 
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
+        // Session exists — check admin role
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single()
 
-      if (error || !profile || profile.role !== 'admin') {
-        window.location.href = '/espace-client'
-        return
+        if (!profile || profile.role !== 'admin') {
+          window.location.href = '/espace-client'
+          return
+        }
+
+        setAuthorized(true)
+        setLoading(false)
       }
-      setAuthorized(true)
-    }
-    checkAdmin()
+    )
+
+    return () => subscription.unsubscribe()
   }, [])
 
   const vehicles = MOCK_VEHICLES
@@ -48,7 +61,7 @@ export default function AdminPage() {
   const sold = vehicles.filter(v => v.status === 'vendu').length
   const topViewed = [...vehicles].sort((a, b) => b.views_count - a.views_count).slice(0, 5)
 
-  if (!authorized) {
+  if (loading || !authorized) {
     return (
       <div className="pt-28 pb-20 min-h-screen flex items-center justify-center">
         <p className="text-gray-400">Vérification des permissions...</p>
