@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   LayoutDashboard, Car, Users, MessageSquare, Bell, Plus,
   Eye, Heart, TrendingUp
@@ -21,45 +21,62 @@ const adminTabs = [
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('dashboard')
-  const [authorized, setAuthorized] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [status, setStatus] = useState<'loading' | 'authorized' | 'denied'>('loading')
+
+  const checkRole = useCallback(async (userId: string) => {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single()
+
+    if (profile?.role === 'admin') {
+      setStatus('authorized')
+    } else {
+      setStatus('denied')
+      window.location.href = '/espace-client'
+    }
+  }, [])
 
   useEffect(() => {
-    async function checkAdmin() {
-      const { data: { user } } = await supabase.auth.getUser()
+    let redirected = false
 
-      if (!user) {
-        window.location.href = '/login'
-        return
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (redirected) return
+
+        // Only act on the initial session load
+        if (event === 'INITIAL_SESSION') {
+          if (!session) {
+            redirected = true
+            window.location.href = '/login'
+          } else {
+            checkRole(session.user.id)
+          }
+        }
       }
+    )
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
-      if (profile?.role !== 'admin') {
-        window.location.href = '/espace-client'
-        return
-      }
-
-      setAuthorized(true)
-      setLoading(false)
-    }
-
-    checkAdmin()
-  }, [])
+    return () => subscription.unsubscribe()
+  }, [checkRole])
 
   const vehicles = MOCK_VEHICLES
   const available = vehicles.filter(v => v.status === 'disponible').length
   const sold = vehicles.filter(v => v.status === 'vendu').length
   const topViewed = [...vehicles].sort((a, b) => b.views_count - a.views_count).slice(0, 5)
 
-  if (loading || !authorized) {
+  if (status === 'loading') {
     return (
       <div className="pt-28 pb-20 min-h-screen flex items-center justify-center">
-        <p className="text-gray-400">Vérification des permissions...</p>
+        <p className="text-gray-400">Chargement...</p>
+      </div>
+    )
+  }
+
+  if (status === 'denied') {
+    return (
+      <div className="pt-28 pb-20 min-h-screen flex items-center justify-center">
+        <p className="text-gray-400">Accès refusé. Redirection...</p>
       </div>
     )
   }
@@ -101,7 +118,6 @@ export default function AdminPage() {
           <div className="flex-1">
             {activeTab === 'dashboard' && (
               <div className="space-y-6">
-                {/* Stats cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {[
                     { label: 'Véhicules en ligne', value: available, icon: Car, color: 'bg-blue-50 text-blue-600' },
@@ -119,7 +135,6 @@ export default function AdminPage() {
                   ))}
                 </div>
 
-                {/* Top viewed */}
                 <div className="bg-white rounded-2xl border border-gray-100 p-6">
                   <h3 className="font-semibold text-[#111827] mb-4 flex items-center gap-2">
                     <Eye className="w-4 h-4 text-gray-400" />
