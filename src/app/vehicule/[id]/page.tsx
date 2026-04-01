@@ -1,0 +1,209 @@
+'use client'
+
+import { useParams } from 'next/navigation'
+import Link from 'next/link'
+import { MOCK_VEHICLES } from '@/lib/mock-data'
+import { EUR_TO_FCFA, WHATSAPP_NUMBER } from '@/lib/constants'
+import VehicleCard from '@/components/vehicles/VehicleCard'
+import FadeIn from '@/components/motion/FadeIn'
+import {
+  Heart, Share2, MessageCircle, Ship, HelpCircle,
+  Calendar, Gauge, Fuel, Cog, Zap, Palette,
+  Users, DoorOpen, Car, AlertTriangle, ChevronLeft
+} from 'lucide-react'
+
+function formatPrice(price: number): string {
+  return new Intl.NumberFormat('fr-FR').format(price)
+}
+
+export default function VehiclePage() {
+  const params = useParams()
+  const vehicle = MOCK_VEHICLES.find(v => v.id === params.id)
+
+  if (!vehicle) {
+    return (
+      <div className="pt-28 pb-20 text-center">
+        <h1 className="text-2xl font-bold text-[#111827] mb-4">Véhicule introuvable</h1>
+        <Link href="/catalogue" className="text-[#2563EB] hover:underline">Retour au catalogue</Link>
+      </div>
+    )
+  }
+
+  const similar = MOCK_VEHICLES
+    .filter(v => v.id !== vehicle.id && (v.brand === vehicle.brand || v.body_type === vehicle.body_type))
+    .slice(0, 4)
+
+  const whatsappMessages = [
+    {
+      icon: MessageCircle,
+      label: 'Je veux plus de détails sur ce véhicule',
+      message: `Bonjour, je suis intéressé par le ${vehicle.brand} ${vehicle.model} ${vehicle.year} à ${formatPrice(vehicle.price_eur)}€ sur DRAZONO. Pouvez-vous me donner plus de détails ?`,
+    },
+    {
+      icon: Ship,
+      label: 'Je veux un devis transport + douane',
+      message: `Bonjour, je souhaite un devis de transport pour le ${vehicle.brand} ${vehicle.model} vers [pays]. Merci !`,
+    },
+    {
+      icon: HelpCircle,
+      label: 'Je veux un conseil pour choisir',
+      message: `Bonjour, j'hésite entre plusieurs véhicules sur DRAZONO, pouvez-vous me conseiller ?`,
+    },
+  ]
+
+  const specs = [
+    { icon: Calendar, label: 'Année', value: vehicle.year },
+    { icon: Gauge, label: 'Kilométrage', value: vehicle.mileage === 0 ? '0 km (neuf)' : `${formatPrice(vehicle.mileage)} km` },
+    { icon: Fuel, label: 'Carburant', value: vehicle.fuel_type },
+    { icon: Cog, label: 'Transmission', value: vehicle.transmission },
+    { icon: Zap, label: 'Puissance', value: vehicle.power },
+    { icon: Palette, label: 'Couleur', value: vehicle.color },
+    { icon: Users, label: 'Places', value: vehicle.seats },
+    { icon: DoorOpen, label: 'Portes', value: vehicle.doors },
+    { icon: Car, label: 'Carrosserie', value: vehicle.body_type },
+  ]
+
+  return (
+    <div className="pt-20 pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Breadcrumb */}
+        <FadeIn>
+          <Link href="/catalogue" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-[#2563EB] mb-6 transition-colors">
+            <ChevronLeft className="w-4 h-4" />
+            Retour au catalogue
+          </Link>
+        </FadeIn>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          {/* Gallery */}
+          <FadeIn>
+            <div className="relative aspect-[4/3] bg-gray-100 rounded-2xl overflow-hidden">
+              <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                <span className="text-gray-400">{vehicle.brand} {vehicle.model} — Photo principale</span>
+              </div>
+              <div className="absolute top-4 left-4 flex gap-2">
+                <span className={`text-xs font-medium px-3 py-1.5 rounded-full ${vehicle.condition === 'neuf' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                  {vehicle.condition === 'neuf' ? 'Neuf' : 'Occasion'}
+                </span>
+                <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-blue-100 text-blue-700">
+                  Vérifié DRAZONO ✓
+                </span>
+                <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-red-50 text-red-700">
+                  🇨🇳 Direct Chine
+                </span>
+              </div>
+              {vehicle.status === 'vendu' && (
+                <div className="absolute top-4 right-4">
+                  <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-red-100 text-red-700">Vendu</span>
+                </div>
+              )}
+            </div>
+            {/* Thumbnails placeholder */}
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="aspect-[4/3] bg-gray-100 rounded-lg flex items-center justify-center">
+                  <span className="text-xs text-gray-400">Photo {i}</span>
+                </div>
+              ))}
+            </div>
+          </FadeIn>
+
+          {/* Info */}
+          <FadeIn delay={0.15}>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#111827] tracking-tight">
+                {vehicle.brand} {vehicle.model} {vehicle.year}
+              </h1>
+
+              <p className="text-3xl sm:text-4xl font-bold text-[#2563EB] mt-3">
+                {formatPrice(vehicle.price_eur)} €
+              </p>
+              <p className="text-base text-gray-500 mt-1">
+                ≈ {formatPrice(vehicle.price_eur * EUR_TO_FCFA)} FCFA
+              </p>
+
+              {/* Transport notice */}
+              <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                <p className="text-sm text-blue-800">
+                  💡 Transport en option — contactez-nous pour un devis personnalisé
+                </p>
+              </div>
+
+              {/* WhatsApp buttons */}
+              <div className="mt-6 space-y-3">
+                {whatsappMessages.map((wa, i) => (
+                  <a
+                    key={i}
+                    href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(wa.message)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 w-full p-3 bg-[#25D366] hover:bg-[#20BD5A] text-white rounded-xl transition-colors"
+                  >
+                    <wa.icon className="w-5 h-5 shrink-0" />
+                    <span className="text-sm font-medium">{wa.label}</span>
+                  </a>
+                ))}
+              </div>
+
+              {/* Actions */}
+              <div className="mt-6 flex gap-3">
+                <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                  <Heart className="w-4 h-4" />
+                  Ajouter aux favoris
+                </button>
+                <button className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                  <Share2 className="w-4 h-4" />
+                  Partager
+                </button>
+              </div>
+
+              {/* Availability warning */}
+              <p className="mt-4 text-xs text-gray-400 flex items-center gap-1">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                Sous réserve de disponibilité fournisseur
+              </p>
+            </div>
+          </FadeIn>
+        </div>
+
+        {/* Specs */}
+        <FadeIn delay={0.2}>
+          <div className="mt-12">
+            <h2 className="text-xl font-bold text-[#111827] mb-6">Fiche technique</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+              {specs.map((spec) => (
+                <div key={spec.label} className="p-4 bg-[#FAFAFA] rounded-xl border border-gray-100">
+                  <spec.icon className="w-5 h-5 text-[#2563EB] mb-2" />
+                  <p className="text-xs text-gray-500">{spec.label}</p>
+                  <p className="text-sm font-semibold text-[#111827] mt-0.5">{spec.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </FadeIn>
+
+        {/* Description */}
+        <FadeIn delay={0.25}>
+          <div className="mt-12">
+            <h2 className="text-xl font-bold text-[#111827] mb-4">Description</h2>
+            <p className="text-gray-600 leading-relaxed">{vehicle.description}</p>
+          </div>
+        </FadeIn>
+
+        {/* Similar vehicles */}
+        {similar.length > 0 && (
+          <FadeIn delay={0.3}>
+            <div className="mt-16">
+              <h2 className="text-xl font-bold text-[#111827] mb-6">Véhicules similaires</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {similar.map(v => (
+                  <VehicleCard key={v.id} vehicle={v} />
+                ))}
+              </div>
+            </div>
+          </FadeIn>
+        )}
+      </div>
+    </div>
+  )
+}
