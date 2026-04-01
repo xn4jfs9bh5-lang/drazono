@@ -1,0 +1,42 @@
+'use client'
+
+import FadeIn from '@/components/motion/FadeIn'
+
+export default function FounderSection() {
+  return (
+    <section className="py-20 bg-[#FAFAFA]">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <FadeIn>
+          <div className="flex flex-col md:flex-row items-center gap-10">
+            {/* Avatar placeholder */}
+            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#2563EB] to-[#1E40AF] flex items-center justify-center shrink-0">
+              <span className="text-4xl font-bold text-white">B</span>
+            </div>
+
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#111827] tracking-tight mb-4">
+                Qui est derrière DRAZONO
+              </h2>
+              <p className="text-gray-600 leading-relaxed mb-3">
+                Je m&apos;appelle <strong>Brayann</strong>, fondateur de DRAZONO. Après avoir créé
+                BF Auto Market, une plateforme d&apos;importation de véhicules d&apos;occasion pour le
+                Burkina Faso, j&apos;ai décidé d&apos;ouvrir l&apos;accès aux véhicules chinois au monde entier.
+              </p>
+              <p className="text-gray-600 leading-relaxed mb-3">
+                Les véhicules chinois sont 2 à 3 fois moins chers que leurs équivalents
+                européens ou japonais, et leur qualité a explosé ces dernières années.
+                Mon objectif : vous permettre d&apos;y accéder au prix réel du vendeur,
+                sans intermédiaire inutile.
+              </p>
+              <p className="text-gray-600 leading-relaxed">
+                Chaque véhicule sur DRAZONO est vérifié personnellement. Je communique
+                directement avec les vendeurs chinois via WeChat. <strong>Transparence et
+                confiance</strong>, c&apos;est ma promesse.
+              </p>
+            </div>
+          </div>
+        </FadeIn>
+      </div>
+    </section>
+  )
+}
