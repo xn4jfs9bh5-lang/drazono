@@ -25,35 +25,30 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Wait for Supabase to restore session from cookies before checking
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!session) {
-          // No session after auth is ready → not logged in
-          if (event === 'INITIAL_SESSION' || event === 'SIGNED_OUT') {
-            window.location.href = '/login'
-          }
-          return
-        }
+    async function checkAdmin() {
+      const { data: { user } } = await supabase.auth.getUser()
 
-        // Session exists — check admin role
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .single()
-
-        if (!profile || profile.role !== 'admin') {
-          window.location.href = '/espace-client'
-          return
-        }
-
-        setAuthorized(true)
-        setLoading(false)
+      if (!user) {
+        window.location.href = '/login'
+        return
       }
-    )
 
-    return () => subscription.unsubscribe()
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (profile?.role !== 'admin') {
+        window.location.href = '/espace-client'
+        return
+      }
+
+      setAuthorized(true)
+      setLoading(false)
+    }
+
+    checkAdmin()
   }, [])
 
   const vehicles = MOCK_VEHICLES
