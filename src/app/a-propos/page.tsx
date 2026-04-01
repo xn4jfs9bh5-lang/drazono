@@ -1,5 +1,11 @@
+import { Metadata } from 'next'
 import { ShieldCheck, Camera, MessageCircle, Eye } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
+
+export const metadata: Metadata = {
+  title: 'À propos — DRAZONO',
+  description: 'Découvrez l\'histoire de DRAZONO, la plateforme d\'import de véhicules chinois. Fondée par Brayann, transparence et confiance.',
+}
 
 const commitments = [
   { icon: Eye, title: 'Transparence totale', description: 'Prix réel, pas de frais cachés, commission incluse dans le prix affiché.' },

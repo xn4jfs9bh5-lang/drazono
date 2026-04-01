@@ -1,5 +1,11 @@
+import { Metadata } from 'next'
 import { Check, X, Video, Ship, FileCheck } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
+
+export const metadata: Metadata = {
+  title: 'Tarifs et services — DRAZONO',
+  description: 'Découvrez nos tarifs transparents et services : commission incluse, transport maritime, inspection vidéo, accompagnement douanier.',
+}
 
 const included = [
   'Recherche et sélection des meilleurs véhicules',

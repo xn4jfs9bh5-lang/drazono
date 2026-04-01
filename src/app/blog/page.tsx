@@ -1,4 +1,10 @@
+import { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Blog & Guides — DRAZONO',
+  description: 'Guides, comparatifs et conseils pour acheter votre véhicule chinois. Import Chine, meilleures marques, astuces.',
+}
 import { Clock } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
 import { BLOG_POSTS } from '@/lib/blog-data'

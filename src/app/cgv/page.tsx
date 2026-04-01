@@ -1,4 +1,9 @@
+import { Metadata } from 'next'
 import FadeIn from '@/components/motion/FadeIn'
+
+export const metadata: Metadata = {
+  title: 'Conditions Générales de Vente — DRAZONO',
+}
 
 export default function CGVPage() {
   return (

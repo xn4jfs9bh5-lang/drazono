@@ -1,3 +1,4 @@
+import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Clock, ChevronLeft, Share2 } from 'lucide-react'
@@ -24,6 +25,15 @@ function renderMarkdown(content: string): string {
 
 export function generateStaticParams() {
   return BLOG_POSTS.filter(p => p.published).map(p => ({ slug: p.slug }))
+}
+
+export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
+  const post = BLOG_POSTS.find(p => p.slug === params.slug)
+  if (!post) return { title: 'Article introuvable — DRAZONO' }
+  return {
+    title: `${post.title} — DRAZONO`,
+    description: post.content.replace(/[#*]/g, '').slice(0, 160),
+  }
 }
 
 export default function BlogPostPage({ params }: { params: { slug: string } }) {
