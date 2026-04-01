@@ -30,8 +30,8 @@ export async function middleware(req: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession()
   const path = req.nextUrl.pathname
 
-  // Protected routes: must be logged in
-  if (path.startsWith('/espace-client') || path.startsWith('/admin')) {
+  // Protected route: must be logged in
+  if (path.startsWith('/espace-client')) {
     if (!session) {
       const loginUrl = new URL('/login', req.url)
       loginUrl.searchParams.set('redirect', path)
@@ -39,8 +39,8 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // Admin role check is done client-side in /admin/page.tsx
-  // because RLS + middleware cookie propagation is unreliable
+  // /admin is NOT protected here — role check is done client-side
+  // in /admin/page.tsx because middleware cookie propagation is unreliable
 
   // Redirect logged-in users away from login/register
   if ((path === '/login' || path === '/register') && session) {
@@ -51,5 +51,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/espace-client/:path*', '/admin/:path*', '/login', '/register'],
+  matcher: ['/espace-client/:path*', '/login', '/register'],
 }
