@@ -26,10 +26,11 @@ export async function middleware(req: NextRequest) {
     }
   )
 
+  // Refresh session — this is required to keep cookies in sync
   const { data: { session } } = await supabase.auth.getSession()
   const path = req.nextUrl.pathname
 
-  // Protected routes: redirect to login if not authenticated
+  // Protected routes: must be logged in
   if (path.startsWith('/espace-client') || path.startsWith('/admin')) {
     if (!session) {
       const loginUrl = new URL('/login', req.url)
@@ -38,18 +39,8 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // Admin route: verify admin role in database
-  if (path.startsWith('/admin') && session) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', session.user.id)
-      .single()
-
-    if (!profile || profile.role !== 'admin') {
-      return NextResponse.redirect(new URL('/espace-client', req.url))
-    }
-  }
+  // Admin role check is done client-side in /admin/page.tsx
+  // because RLS + middleware cookie propagation is unreliable
 
   // Redirect logged-in users away from login/register
   if ((path === '/login' || path === '/register') && session) {

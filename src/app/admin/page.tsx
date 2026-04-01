@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Car, Users, MessageSquare, Bell, Plus,
   Eye, Heart, TrendingUp
@@ -21,29 +20,28 @@ const adminTabs = [
 ]
 
 export default function AdminPage() {
-  const router = useRouter()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [authorized, setAuthorized] = useState(false)
 
   useEffect(() => {
     async function checkAdmin() {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
+      if (!user) { window.location.href = '/login'; return }
 
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single()
 
-      if (!profile || profile.role !== 'admin') {
-        router.push('/espace-client')
+      if (error || !profile || profile.role !== 'admin') {
+        window.location.href = '/espace-client'
         return
       }
       setAuthorized(true)
     }
     checkAdmin()
-  }, [router])
+  }, [])
 
   const vehicles = MOCK_VEHICLES
   const available = vehicles.filter(v => v.status === 'disponible').length
