@@ -16,8 +16,6 @@ export default function RegisterPage() {
     setLoading(true)
     setError('')
 
-    console.log('[DRAZONO] Inscription en cours...', { email: form.email, name: form.name })
-
     // 1. Sign up with Supabase Auth
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: form.email,
@@ -32,13 +30,10 @@ export default function RegisterPage() {
     })
 
     if (signUpError) {
-      console.error('[DRAZONO] Erreur inscription:', signUpError.message)
       setError(signUpError.message)
       setLoading(false)
       return
     }
-
-    console.log('[DRAZONO] Auth signup OK:', data)
 
     // 2. Insert profile in profiles table
     if (data.user) {
@@ -52,10 +47,7 @@ export default function RegisterPage() {
       })
 
       if (profileError) {
-        console.error('[DRAZONO] Erreur profil:', profileError.message)
         // Not blocking — profile can be created later via trigger
-      } else {
-        console.log('[DRAZONO] Profil créé avec succès')
       }
     }
 
@@ -64,7 +56,6 @@ export default function RegisterPage() {
   }
 
   const handleGoogleSignIn = async () => {
-    console.log('[DRAZONO] Connexion Google...')
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -72,7 +63,6 @@ export default function RegisterPage() {
       },
     })
     if (error) {
-      console.error('[DRAZONO] Erreur Google:', error.message)
       setError(error.message)
     }
   }

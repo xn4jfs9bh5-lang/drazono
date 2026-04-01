@@ -3,15 +3,34 @@
 import { useState } from 'react'
 import { MessageCircle, Mail, Send } from 'lucide-react'
 import { WHATSAPP_URL, CONTACT_EMAIL } from '@/lib/constants'
+import { supabase } from '@/lib/supabase'
 import FadeIn from '@/components/motion/FadeIn'
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Save to Supabase contact_requests table
+    setLoading(true)
+    setError('')
+
+    const { error: insertError } = await supabase.from('contact_requests').insert({
+      name: form.name.trim(),
+      email: form.email.trim(),
+      subject: form.subject,
+      message: form.message.trim(),
+    })
+
+    if (insertError) {
+      setError('Erreur lors de l\'envoi. Veuillez réessayer ou nous contacter sur WhatsApp.')
+      setLoading(false)
+      return
+    }
+
+    setLoading(false)
     setSubmitted(true)
   }
 
@@ -29,7 +48,6 @@ export default function ContactPage() {
           </div>
         </FadeIn>
 
-        {/* WhatsApp CTA */}
         <FadeIn delay={0.1}>
           <a
             href={WHATSAPP_URL}
@@ -52,7 +70,6 @@ export default function ContactPage() {
           </a>
         </FadeIn>
 
-        {/* Form */}
         <FadeIn delay={0.2}>
           <div className="bg-[#FAFAFA] rounded-2xl border border-gray-100 p-6 sm:p-8">
             <h2 className="text-lg font-bold text-[#111827] mb-6">Formulaire de contact</h2>
@@ -67,11 +84,18 @@ export default function ContactPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
+                {error && (
+                  <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-600">
+                    {error}
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
                   <input
                     type="text"
                     required
+                    maxLength={100}
                     value={form.name}
                     onChange={e => setForm({ ...form, name: e.target.value })}
                     className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
@@ -83,6 +107,7 @@ export default function ContactPage() {
                   <input
                     type="email"
                     required
+                    maxLength={200}
                     value={form.email}
                     onChange={e => setForm({ ...form, email: e.target.value })}
                     className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
@@ -98,10 +123,10 @@ export default function ContactPage() {
                     className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
                   >
                     <option value="">Sélectionnez un sujet</option>
-                    <option value="vehicle-info">Infos sur un véhicule</option>
-                    <option value="transport-quote">Devis transport</option>
-                    <option value="partnership">Partenariat</option>
-                    <option value="other">Autre</option>
+                    <option value="Infos sur un véhicule">Infos sur un véhicule</option>
+                    <option value="Devis transport">Devis transport</option>
+                    <option value="Partenariat">Partenariat</option>
+                    <option value="Autre">Autre</option>
                   </select>
                 </div>
 
@@ -110,6 +135,7 @@ export default function ContactPage() {
                   <textarea
                     required
                     rows={4}
+                    maxLength={2000}
                     value={form.message}
                     onChange={e => setForm({ ...form, message: e.target.value })}
                     className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent resize-none"
@@ -118,9 +144,10 @@ export default function ContactPage() {
 
                 <button
                   type="submit"
-                  className="w-full h-11 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors"
+                  disabled={loading}
+                  className="w-full h-11 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Envoyer
+                  {loading ? 'Envoi en cours...' : 'Envoyer'}
                 </button>
               </form>
             )}

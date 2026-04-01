@@ -12,32 +12,28 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
 
-    console.log('[DRAZONO] Connexion en cours...', email)
-
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
+    const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
     if (signInError) {
-      console.error('[DRAZONO] Erreur connexion:', signInError.message)
       setError(signInError.message)
       setLoading(false)
       return
     }
 
-    console.log('[DRAZONO] Connexion OK:', data.user?.email)
     router.push('/espace-client')
   }
 
   const handleGoogleSignIn = async () => {
-    console.log('[DRAZONO] Connexion Google...')
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -45,7 +41,6 @@ export default function LoginPage() {
       },
     })
     if (error) {
-      console.error('[DRAZONO] Erreur Google:', error.message)
       setError(error.message)
     }
   }
@@ -55,7 +50,6 @@ export default function LoginPage() {
       setError('Entrez votre email d\'abord.')
       return
     }
-    console.log('[DRAZONO] Reset password pour:', email)
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/login`,
     })
@@ -63,7 +57,7 @@ export default function LoginPage() {
       setError(error.message)
     } else {
       setError('')
-      alert('Email de réinitialisation envoyé ! Vérifiez votre boîte mail.')
+      setMessage('Email de réinitialisation envoyé ! Vérifiez votre boîte mail.')
     }
   }
 
@@ -84,6 +78,11 @@ export default function LoginPage() {
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-600">
                 {error}
+              </div>
+            )}
+            {message && (
+              <div className="mb-4 p-3 bg-emerald-50 border border-emerald-100 rounded-lg text-sm text-emerald-700">
+                {message}
               </div>
             )}
 

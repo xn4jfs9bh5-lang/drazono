@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Car, Users, MessageSquare, Bell, Plus,
   Eye, Heart, TrendingUp
@@ -8,6 +9,7 @@ import {
 import FadeIn from '@/components/motion/FadeIn'
 import { MOCK_VEHICLES } from '@/lib/mock-data'
 import { BRANDS, BODY_TYPES, FUEL_TYPES, TRANSMISSIONS } from '@/lib/constants'
+import { supabase } from '@/lib/supabase'
 
 const adminTabs = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -19,12 +21,42 @@ const adminTabs = [
 ]
 
 export default function AdminPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [authorized, setAuthorized] = useState(false)
+
+  useEffect(() => {
+    async function checkAdmin() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/login'); return }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile || profile.role !== 'admin') {
+        router.push('/espace-client')
+        return
+      }
+      setAuthorized(true)
+    }
+    checkAdmin()
+  }, [router])
 
   const vehicles = MOCK_VEHICLES
   const available = vehicles.filter(v => v.status === 'disponible').length
   const sold = vehicles.filter(v => v.status === 'vendu').length
   const topViewed = [...vehicles].sort((a, b) => b.views_count - a.views_count).slice(0, 5)
+
+  if (!authorized) {
+    return (
+      <div className="pt-28 pb-20 min-h-screen flex items-center justify-center">
+        <p className="text-gray-400">Vérification des permissions...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="pt-20 pb-16">
