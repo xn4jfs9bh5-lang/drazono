@@ -3,19 +3,110 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import FadeIn from '@/components/motion/FadeIn'
+import { supabase } from '@/lib/supabase'
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '', phone: '', country: '' })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Supabase Auth sign up
+    setLoading(true)
+    setError('')
+
+    console.log('[DRAZONO] Inscription en cours...', { email: form.email, name: form.name })
+
+    // 1. Sign up with Supabase Auth
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: {
+        data: {
+          name: form.name,
+          phone: form.phone || null,
+          country: form.country || null,
+        },
+      },
+    })
+
+    if (signUpError) {
+      console.error('[DRAZONO] Erreur inscription:', signUpError.message)
+      setError(signUpError.message)
+      setLoading(false)
+      return
+    }
+
+    console.log('[DRAZONO] Auth signup OK:', data)
+
+    // 2. Insert profile in profiles table
+    if (data.user) {
+      const { error: profileError } = await supabase.from('profiles').upsert({
+        id: data.user.id,
+        email: form.email,
+        name: form.name,
+        phone: form.phone || null,
+        country: form.country || null,
+        role: 'client',
+      })
+
+      if (profileError) {
+        console.error('[DRAZONO] Erreur profil:', profileError.message)
+        // Not blocking — profile can be created later via trigger
+      } else {
+        console.log('[DRAZONO] Profil créé avec succès')
+      }
+    }
+
+    setLoading(false)
+    setSuccess(true)
+  }
+
+  const handleGoogleSignIn = async () => {
+    console.log('[DRAZONO] Connexion Google...')
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/espace-client`,
+      },
+    })
+    if (error) {
+      console.error('[DRAZONO] Erreur Google:', error.message)
+      setError(error.message)
+    }
   }
 
   const countries = [
     'Burkina Faso', 'Sénégal', 'Côte d\'Ivoire', 'Mali', 'Bénin', 'Togo', 'Niger',
     'Guinée', 'Cameroun', 'Congo', 'Gabon', 'France', 'Belgique', 'Canada', 'Autre'
   ]
+
+  if (success) {
+    return (
+      <div className="pt-28 pb-20 min-h-screen flex items-center justify-center">
+        <div className="w-full max-w-md px-4 text-center">
+          <FadeIn>
+            <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
+              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">✓</span>
+              </div>
+              <h2 className="text-xl font-bold text-[#111827] mb-2">Compte créé !</h2>
+              <p className="text-gray-500 text-sm mb-6">
+                Vérifiez votre email pour confirmer votre inscription.
+              </p>
+              <Link
+                href="/login"
+                className="inline-block h-10 px-6 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg font-medium text-sm leading-10 transition-colors"
+              >
+                Se connecter
+              </Link>
+            </div>
+          </FadeIn>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="pt-28 pb-20 min-h-screen flex items-center justify-center">
@@ -31,6 +122,12 @@ export default function RegisterPage() {
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-sm">
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-600">
+                {error}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
@@ -90,9 +187,10 @@ export default function RegisterPage() {
 
               <button
                 type="submit"
-                className="w-full h-11 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors"
+                disabled={loading}
+                className="w-full h-11 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Créer mon compte
+                {loading ? 'Création en cours...' : 'Créer mon compte'}
               </button>
             </form>
 
@@ -105,7 +203,10 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <button className="w-full h-11 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+            <button
+              onClick={handleGoogleSignIn}
+              className="w-full h-11 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+            >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />

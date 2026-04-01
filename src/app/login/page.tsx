@@ -1,16 +1,70 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import FadeIn from '@/components/motion/FadeIn'
+import { supabase } from '@/lib/supabase'
 
 export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Supabase Auth sign in
+    setLoading(true)
+    setError('')
+
+    console.log('[DRAZONO] Connexion en cours...', email)
+
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (signInError) {
+      console.error('[DRAZONO] Erreur connexion:', signInError.message)
+      setError(signInError.message)
+      setLoading(false)
+      return
+    }
+
+    console.log('[DRAZONO] Connexion OK:', data.user?.email)
+    router.push('/espace-client')
+  }
+
+  const handleGoogleSignIn = async () => {
+    console.log('[DRAZONO] Connexion Google...')
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/espace-client`,
+      },
+    })
+    if (error) {
+      console.error('[DRAZONO] Erreur Google:', error.message)
+      setError(error.message)
+    }
+  }
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Entrez votre email d\'abord.')
+      return
+    }
+    console.log('[DRAZONO] Reset password pour:', email)
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/login`,
+    })
+    if (error) {
+      setError(error.message)
+    } else {
+      setError('')
+      alert('Email de réinitialisation envoyé ! Vérifiez votre boîte mail.')
+    }
   }
 
   return (
@@ -27,6 +81,12 @@ export default function LoginPage() {
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-sm">
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-600">
+                {error}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
@@ -53,16 +113,21 @@ export default function LoginPage() {
               </div>
 
               <div className="text-right">
-                <Link href="/login" className="text-xs text-[#2563EB] hover:underline">
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  className="text-xs text-[#2563EB] hover:underline"
+                >
                   Mot de passe oublié ?
-                </Link>
+                </button>
               </div>
 
               <button
                 type="submit"
-                className="w-full h-11 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors"
+                disabled={loading}
+                className="w-full h-11 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Se connecter
+                {loading ? 'Connexion...' : 'Se connecter'}
               </button>
             </form>
 
@@ -75,7 +140,10 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <button className="w-full h-11 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+            <button
+              onClick={handleGoogleSignIn}
+              className="w-full h-11 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+            >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
