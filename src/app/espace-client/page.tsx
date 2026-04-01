@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { User, Heart, Bell, Clock, FileText, LogOut } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
 import { supabase } from '@/lib/supabase'
@@ -16,7 +15,6 @@ const tabs = [
 ]
 
 export default function EspaceClientPage() {
-  const router = useRouter()
   const [activeTab, setActiveTab] = useState('profile')
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState({ name: '', email: '', phone: '', country: '', city: '' })
@@ -27,11 +25,11 @@ export default function EspaceClientPage() {
     async function loadProfile() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      router.push('/login')
+      window.location.href = '/login'
       return
     }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .select('name, email, phone, country, city')
       .eq('id', user.id)
@@ -46,7 +44,16 @@ export default function EspaceClientPage() {
         city: data.city || '',
       })
     } else {
-      setProfile(p => ({ ...p, email: user.email || '' }))
+      // Profile doesn't exist yet — create it now
+      const userName = user.user_metadata?.name || user.email?.split('@')[0] || ''
+      await supabase.from('profiles').upsert({
+        id: user.id,
+        email: user.email || '',
+        name: userName,
+        role: 'client',
+      })
+      setProfile(p => ({ ...p, email: user.email || '', name: userName }))
+      if (error) { /* table may not exist yet, non-blocking */ }
     }
     setLoading(false)
     }
@@ -75,7 +82,7 @@ export default function EspaceClientPage() {
 
   async function handleLogout() {
     await supabase.auth.signOut()
-    router.push('/')
+    window.location.href = '/'
   }
 
   if (loading) {

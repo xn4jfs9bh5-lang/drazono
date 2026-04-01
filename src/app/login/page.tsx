@@ -1,13 +1,35 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import FadeIn from '@/components/motion/FadeIn'
 import { supabase } from '@/lib/supabase'
 
+// Translate common Supabase auth errors to French
+function translateError(msg: string): string {
+  const map: Record<string, string> = {
+    'Invalid login credentials': 'Email ou mot de passe incorrect.',
+    'Email not confirmed': 'Votre email n\'est pas encore confirmé. Vérifiez votre boîte mail.',
+    'User not found': 'Aucun compte trouvé avec cet email.',
+    'Too many requests': 'Trop de tentatives. Réessayez dans quelques minutes.',
+    'Email rate limit exceeded': 'Trop de demandes. Réessayez dans quelques minutes.',
+    'User already registered': 'Un compte existe déjà avec cet email.',
+  }
+  return map[msg] || msg
+}
+
 export default function LoginPage() {
-  const router = useRouter()
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  )
+}
+
+function LoginForm() {
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') || '/espace-client'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -18,19 +40,26 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setMessage('')
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    if (signInError) {
-      setError(signInError.message)
+      if (signInError) {
+        setError(translateError(signInError.message))
+        setLoading(false)
+        return
+      }
+
+      // Full page reload to ensure cookies are set before middleware runs
+      window.location.href = redirectTo
+    } catch {
+      setError('Erreur de connexion. Vérifiez votre connexion internet.')
       setLoading(false)
-      return
     }
-
-    router.push('/espace-client')
   }
 
   const handleGoogleSignIn = async () => {
@@ -41,7 +70,7 @@ export default function LoginPage() {
       },
     })
     if (error) {
-      setError(error.message)
+      setError(translateError(error.message))
     }
   }
 
@@ -50,13 +79,13 @@ export default function LoginPage() {
       setError('Entrez votre email d\'abord.')
       return
     }
+    setError('')
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/login`,
     })
     if (error) {
-      setError(error.message)
+      setError(translateError(error.message))
     } else {
-      setError('')
       setMessage('Email de réinitialisation envoyé ! Vérifiez votre boîte mail.')
     }
   }
