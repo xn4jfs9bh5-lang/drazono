@@ -268,6 +268,7 @@ export default function AdminPage() {
     // Validation
     if (!form.brand) { toast.error('Selectionnez une marque'); return }
     if (!form.model.trim()) { toast.error('Entrez un modele'); return }
+    if (!form.year || form.year < 2000 || form.year > new Date().getFullYear() + 1) { toast.error('Entrez une annee valide'); return }
     if (form.price_eur <= 0) { toast.error('Entrez un prix valide'); return }
 
     setSubmitting(true)
@@ -338,9 +339,11 @@ export default function AdminPage() {
       fetchVehicles()
       fetchStats()
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Erreur inconnue'
       console.error('[ADMIN] submit error:', err)
+      const e = err as { message?: string; details?: string; hint?: string; code?: string }
+      const msg = e?.message || e?.details || e?.hint || JSON.stringify(err)
       toast.error(`Erreur: ${msg}`)
+      if (e?.code) console.error('[ADMIN] code:', e.code, 'hint:', e.hint)
     } finally {
       setSubmitting(false)
     }
@@ -369,7 +372,9 @@ export default function AdminPage() {
       fetchVehicles()
       fetchStats()
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Erreur inconnue'
+      console.error('[ADMIN] delete error:', err)
+      const e = err as { message?: string; details?: string; hint?: string }
+      const msg = e?.message || e?.details || JSON.stringify(err)
       toast.error(`Erreur suppression: ${msg}`)
     } finally {
       setDeleting(false)
