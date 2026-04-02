@@ -30,8 +30,6 @@ export const TRANSMISSIONS = [
 
 export const NAV_LINKS = [
   { label: 'Catalogue', href: '/catalogue' },
-  { label: 'Comparer', href: '/comparer' },
-  { label: 'Demande', href: '/demande' },
   { label: 'Comment ça marche', href: '/comment-ca-marche' },
   { label: 'À propos', href: '/a-propos' },
   { label: 'Contact', href: '/contact' },

@@ -4,11 +4,11 @@ import { Shield, CheckCircle, Ship, Zap, Flag } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const items = [
-  { icon: Shield, label: 'Achat sécurisé', color: 'text-[#2563EB] bg-blue-50' },
-  { icon: CheckCircle, label: 'Véhicules vérifiés', color: 'text-emerald-600 bg-emerald-50' },
-  { icon: Ship, label: 'Livraison mondiale', color: 'text-indigo-600 bg-indigo-50' },
-  { icon: Zap, label: 'Réponse &lt; 2h', color: 'text-amber-600 bg-amber-50' },
-  { icon: Flag, label: 'Direct Chine', color: 'text-red-600 bg-red-50' },
+  { icon: Shield, label: 'Acompte remboursable à 100%', color: 'text-[#2563EB] bg-blue-50' },
+  { icon: CheckCircle, label: 'Photos confirmées par le vendeur', color: 'text-emerald-600 bg-emerald-50' },
+  { icon: Ship, label: 'Livraison dans 30+ pays', color: 'text-indigo-600 bg-indigo-50' },
+  { icon: Zap, label: 'Réponse garantie en moins de 2h', color: 'text-amber-600 bg-amber-50' },
+  { icon: Flag, label: 'Prix direct usine Chine', color: 'text-red-600 bg-red-50' },
 ]
 
 export default function TrustBanner() {
@@ -28,10 +28,9 @@ export default function TrustBanner() {
               <div className={`w-9 h-9 rounded-full flex items-center justify-center ${item.color}`}>
                 <item.icon className="w-4 h-4" />
               </div>
-              <span
-                className="text-sm font-medium text-[#111827] whitespace-nowrap"
-                dangerouslySetInnerHTML={{ __html: item.label }}
-              />
+              <span className="text-sm font-medium text-[#111827] whitespace-nowrap">
+                {item.label}
+              </span>
             </motion.div>
           ))}
         </div>

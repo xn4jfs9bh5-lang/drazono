@@ -67,6 +67,7 @@ export default function Footer() {
                   {CONTACT_EMAIL}
                 </a>
               </li>
+              {/* TODO: Remplacer par le vrai numéro WhatsApp de Brayann */}
               <li>
                 <a
                   href={`https://wa.me/${WHATSAPP_NUMBER}`}
@@ -74,7 +75,7 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   className="hover:text-white transition-colors"
                 >
-                  WhatsApp : +{WHATSAPP_NUMBER}
+                  WhatsApp (disponible sur demande)
                 </a>
               </li>
             </ul>

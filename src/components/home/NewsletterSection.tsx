@@ -76,7 +76,7 @@ export default function NewsletterSection() {
           )}
 
           <p className="text-xs text-gray-500 mt-4">
-            Rejoignez 500+ acheteurs informés
+            Soyez parmi les premiers informés
           </p>
         </FadeIn>
       </div>

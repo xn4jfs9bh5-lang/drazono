@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Rocket, Bell } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
 import VehicleCard from '@/components/vehicles/VehicleCard'
 import VehicleCardSkeleton from '@/components/vehicles/VehicleCardSkeleton'
@@ -28,8 +28,6 @@ export default function FeaturedVehicles() {
     fetch()
   }, [])
 
-  if (!loading && vehicles.length === 0) return null
-
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -47,16 +45,35 @@ export default function FeaturedVehicles() {
           </div>
         </FadeIn>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {loading
-            ? Array.from({ length: 4 }).map((_, i) => <VehicleCardSkeleton key={i} />)
-            : vehicles.map((vehicle, i) => (
-                <FadeIn key={vehicle.id} delay={i * 0.1}>
-                  <VehicleCard vehicle={vehicle} />
-                </FadeIn>
-              ))
-          }
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 4 }).map((_, i) => <VehicleCardSkeleton key={i} />)}
+          </div>
+        ) : vehicles.length === 0 ? (
+          <FadeIn>
+            <div className="text-center py-16 bg-[#FAFAFA] rounded-2xl border border-gray-100">
+              <Rocket className="w-12 h-12 text-[#2563EB]/30 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-[#111827] mb-2">
+                Nouveaux véhicules bientôt disponibles
+              </h3>
+              <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
+                Notre catalogue est en cours de mise à jour. Inscrivez-vous pour être alerté en premier.
+              </p>
+              <a href="#newsletter" className="inline-flex items-center gap-2 bg-[#2563EB] text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors">
+                <Bell className="w-4 h-4" />
+                M&apos;alerter des nouveautés
+              </a>
+            </div>
+          </FadeIn>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {vehicles.map((vehicle, i) => (
+              <FadeIn key={vehicle.id} delay={i * 0.1}>
+                <VehicleCard vehicle={vehicle} />
+              </FadeIn>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )

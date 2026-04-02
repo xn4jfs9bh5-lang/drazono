@@ -1,17 +1,29 @@
 'use client'
 
+import { useRef } from 'react'
 import FadeIn from '@/components/motion/FadeIn'
-import CountUp from './CountUp'
+import { useInView } from 'framer-motion'
 
 const savings = [
-  { model: 'BYD Seal EV', europe: 35000, drazono: 18500 },
-  { model: 'Haval H6', europe: 28000, drazono: 14200 },
-  { model: 'Chery Tiggo 8', europe: 32000, drazono: 16800 },
-  { model: 'MG4 EV', europe: 25000, drazono: 13800 },
+  { model: 'BYD Seal EV', europe: 35000, drazono: 18500, percent: 47 },
+  { model: 'Haval H6', europe: 28000, drazono: 14200, percent: 49 },
+  { model: 'Chery Tiggo 8', europe: 32000, drazono: 16800, percent: 47 },
+  { model: 'MG4 EV', europe: 25000, drazono: 13800, percent: 45 },
 ]
 
 function formatPrice(n: number) {
   return new Intl.NumberFormat('fr-FR').format(n)
+}
+
+function AnimatedPercent({ value }: { value: number }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const isInView = useInView(ref, { once: true })
+
+  return (
+    <span ref={ref} className="inline-flex items-center gap-1 text-emerald-700 font-bold text-base">
+      -{isInView ? value : 0}%
+    </span>
+  )
 }
 
 export default function SavingsSection() {
@@ -41,23 +53,16 @@ export default function SavingsSection() {
                 </tr>
               </thead>
               <tbody>
-                {savings.map((row, i) => {
-                  const percent = Math.round((1 - row.drazono / row.europe) * 100)
-                  return (
-                    <FadeIn key={i} delay={0.15 + i * 0.08}>
-                      <tr className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
-                        <td className="py-4 font-medium text-[#111827]">{row.model}</td>
-                        <td className="py-4 text-right text-gray-400 line-through">{formatPrice(row.europe)} &euro;</td>
-                        <td className="py-4 text-right font-bold text-[#2563EB]">{formatPrice(row.drazono)} &euro;</td>
-                        <td className="py-4 text-right">
-                          <span className="inline-flex items-center gap-1 text-emerald-700 font-bold text-base">
-                            -<CountUp end={percent} />%
-                          </span>
-                        </td>
-                      </tr>
-                    </FadeIn>
-                  )
-                })}
+                {savings.map((row, i) => (
+                  <tr key={i} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+                    <td className="py-4 font-medium text-[#111827]">{row.model}</td>
+                    <td className="py-4 text-right text-gray-400 line-through">{formatPrice(row.europe)} &euro;</td>
+                    <td className="py-4 text-right font-bold text-[#2563EB]">{formatPrice(row.drazono)} &euro;</td>
+                    <td className="py-4 text-right">
+                      <AnimatedPercent value={row.percent} />
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
