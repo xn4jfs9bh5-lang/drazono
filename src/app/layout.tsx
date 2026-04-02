@@ -5,6 +5,7 @@ import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import WhatsAppButton from '@/components/layout/WhatsAppButton'
 import ScrollToTop from '@/components/layout/ScrollToTop'
+import AnalyticsTracker from '@/components/layout/AnalyticsTracker'
 import { Toaster } from 'sonner'
 
 const inter = Inter({
@@ -51,6 +52,7 @@ export default function RootLayout({
         <Footer />
         <WhatsAppButton />
         <ScrollToTop />
+        <AnalyticsTracker />
         <Toaster position="top-right" richColors closeButton />
       </body>
     </html>

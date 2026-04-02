@@ -5,9 +5,11 @@ import {
   LayoutDashboard, Car, Users, MessageSquare, Bell, Plus,
   Eye, Heart, TrendingUp, Trash2, Edit3, Search, X, Upload,
   CheckCircle, AlertTriangle, Loader2, ChevronDown, Image as ImageIcon,
-  Filter, RefreshCw
+  Filter, RefreshCw, BarChart3
 } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
+import AnalyticsTab from '@/components/admin/AnalyticsTab'
+import SocialGeneratorModal from '@/components/admin/SocialGeneratorModal'
 import { BRANDS, BODY_TYPES, FUEL_TYPES, TRANSMISSIONS, EUR_TO_FCFA } from '@/lib/constants'
 import { supabase } from '@/lib/supabase'
 import type { Vehicle } from '@/lib/types'
@@ -17,7 +19,7 @@ import { toast } from 'sonner'
 // Types
 // ---------------------------------------------------------------------------
 
-type Tab = 'dashboard' | 'vehicles' | 'add-vehicle' | 'edit-vehicle' | 'clients' | 'requests' | 'alerts'
+type Tab = 'dashboard' | 'vehicles' | 'add-vehicle' | 'edit-vehicle' | 'clients' | 'requests' | 'alerts' | 'analytics'
 
 interface DashboardStats {
   total: number
@@ -58,6 +60,7 @@ const adminTabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'clients', label: 'Clients', icon: Users },
   { id: 'requests', label: 'Demandes', icon: MessageSquare },
   { id: 'alerts', label: 'Alertes', icon: Bell },
+  { id: 'analytics', label: 'Analytics', icon: BarChart3 },
 ]
 
 const STATUS_OPTIONS: { value: Vehicle['status']; label: string; color: string }[] = [
@@ -116,6 +119,7 @@ export default function AdminPage() {
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [socialVehicle, setSocialVehicle] = useState<Vehicle | null>(null)
 
   // -------------------------------------------------------------------------
   // Auth
@@ -408,6 +412,17 @@ export default function AdminPage() {
       toast.success(`Vehicule ${labels[newStatus] ?? 'mis a jour'}`)
       fetchVehicles()
       fetchStats()
+
+      // Send email notification when published
+      if (newStatus === 'disponible') {
+        fetch('/api/emails/new-vehicle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ vehicleId: id }),
+        }).then(r => r.json()).then(d => {
+          if (d.sent > 0) toast.success(`${d.sent} email(s) envoye(s) aux abonnes`)
+        }).catch(() => {})
+      }
     }
   }
 
@@ -671,6 +686,7 @@ export default function AdminPage() {
                             <td className="py-3 text-gray-500">{v.views_count}</td>
                             <td className="py-3 text-right space-x-2">
                               <button onClick={() => startEdit(v)} className="text-xs text-[#2563EB] hover:underline">Modifier</button>
+                              <button onClick={() => setSocialVehicle(v)} className="text-xs text-violet-600 hover:underline">Social</button>
                               <button onClick={() => setDeleteTarget(v.id)} className="text-xs text-red-500 hover:underline">Supprimer</button>
                             </td>
                           </tr>
@@ -958,9 +974,17 @@ export default function AdminPage() {
                 )}
               </div>
             )}
+
+            {/* ==================== ANALYTICS ==================== */}
+            {activeTab === 'analytics' && <AnalyticsTab />}
           </div>
         </div>
       </div>
+
+      {/* ==================== SOCIAL GENERATOR MODAL ==================== */}
+      {socialVehicle && (
+        <SocialGeneratorModal vehicle={socialVehicle} onClose={() => setSocialVehicle(null)} />
+      )}
 
       {/* ==================== DELETE MODAL ==================== */}
       {deleteTarget && (
