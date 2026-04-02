@@ -1,8 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Heart, Fuel, Calendar, Gauge } from 'lucide-react'
 import { Vehicle } from '@/lib/types'
+import { EUR_TO_FCFA } from '@/lib/constants'
 import { motion } from 'framer-motion'
 
 function formatPrice(price: number): string {
@@ -29,9 +31,20 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
           {/* Image */}
           <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
-            <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-              <span className="text-gray-400 text-sm">{vehicle.brand} {vehicle.model}</span>
-            </div>
+            {vehicle.images?.[0] ? (
+              <Image
+                src={vehicle.images[0]}
+                alt={`${vehicle.brand} ${vehicle.model}`}
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                unoptimized
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                <span className="text-gray-400 text-sm">{vehicle.brand} {vehicle.model}</span>
+              </div>
+            )}
 
             {/* Badges top */}
             <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
@@ -74,7 +87,7 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
               {formatPrice(vehicle.price_eur)} €
             </p>
             <p className="text-xs text-gray-500">
-              ≈ {formatPrice(vehicle.price_fcfa)} FCFA
+              ≈ {formatPrice(vehicle.price_fcfa || vehicle.price_eur * EUR_TO_FCFA)} FCFA
             </p>
 
             <div className="flex items-center gap-3 mt-3 text-xs text-gray-500">

@@ -20,6 +20,7 @@ export interface Vehicle {
   views_count: number
   featured: boolean
   verified: boolean
+  video_url: string | null
   created_at: string
   updated_at: string
 }

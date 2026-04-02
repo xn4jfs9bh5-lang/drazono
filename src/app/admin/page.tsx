@@ -48,6 +48,7 @@ const EMPTY_FORM = {
   description: '',
   featured: false,
   status: 'brouillon' as Vehicle['status'],
+  video_url: '',
 }
 
 const adminTabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
@@ -290,6 +291,7 @@ export default function AdminPage() {
         description: form.description.trim(),
         featured: form.featured,
         status: form.status,
+        video_url: form.video_url.trim() || null,
       }
 
       if (editingId) {
@@ -413,6 +415,7 @@ export default function AdminPage() {
       description: vehicle.description,
       featured: vehicle.featured,
       status: vehicle.status,
+      video_url: vehicle.video_url ?? '',
     })
     setExistingImages(vehicle.images ?? [])
     setPhotos([])
@@ -777,6 +780,21 @@ export default function AdminPage() {
                       onChange={e => setForm(f => ({ ...f, description: e.target.value.slice(0, 1000) }))}
                       className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] resize-none transition-colors"
                     />
+                  </div>
+
+                  {/* Video URL */}
+                  <div>
+                    <label className={labelClass}>URL Video (optionnel)</label>
+                    <input
+                      type="url"
+                      value={form.video_url}
+                      onChange={e => setForm(f => ({ ...f, video_url: e.target.value }))}
+                      className={inputClass}
+                      placeholder="https://youtube.com/watch?v=... ou lien direct .mp4"
+                    />
+                    {form.video_url && (
+                      <p className="text-xs text-gray-400 mt-1">La video sera affichee sur la fiche vehicule</p>
+                    )}
                   </div>
 
                   {/* Photos */}

@@ -260,6 +260,38 @@ export default function VehiclePage() {
           </div>
         </FadeIn>
 
+        {/* Video */}
+        {vehicle.video_url && (
+          <FadeIn delay={0.27}>
+            <div className="mt-12">
+              <h2 className="text-xl font-bold text-[#111827] mb-4">Vidéo</h2>
+              {(() => {
+                const url = vehicle.video_url!
+                const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
+                if (ytMatch) {
+                  return (
+                    <div className="relative w-full aspect-video rounded-2xl overflow-hidden">
+                      <iframe
+                        src={`https://www.youtube.com/embed/${ytMatch[1]}`}
+                        title="Vidéo du véhicule"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="absolute inset-0 w-full h-full"
+                      />
+                    </div>
+                  )
+                }
+                return (
+                  <video controls className="w-full rounded-2xl" preload="metadata">
+                    <source src={url} />
+                    Votre navigateur ne supporte pas la lecture vidéo.
+                  </video>
+                )
+              })()}
+            </div>
+          </FadeIn>
+        )}
+
         {/* Similar vehicles */}
         {similar.length > 0 && (
           <FadeIn delay={0.3}>
