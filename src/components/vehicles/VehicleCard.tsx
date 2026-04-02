@@ -42,19 +42,19 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
 
   return (
     <motion.div
-      whileHover={{ y: -4, scale: 1.02 }}
-      transition={{ duration: 0.2 }}
+      whileHover={{ y: -6 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
     >
       <Link href={`/vehicule/${vehicle.id}`} className="block group">
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-          {/* Image */}
-          <div className="relative h-56 bg-gray-100 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm card-glow transition-all duration-300">
+          {/* Image — 16:9 ratio */}
+          <div className="relative aspect-video bg-gray-100 overflow-hidden">
             {vehicle.images?.[0] ? (
               <Image
                 src={vehicle.images[0]}
                 alt={`${vehicle.brand} ${vehicle.model} ${vehicle.year}`}
                 fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 unoptimized
               />
@@ -65,23 +65,26 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
               </div>
             )}
 
+            {/* Dark gradient overlay at bottom of photo */}
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
+
             {/* Badges top-left */}
             <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-              <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${conditionBadge.bg}`}>
+              <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${conditionBadge.bg}`}>
                 {conditionBadge.label}
               </span>
               {statusBadge && (
-                <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusBadge.bg}`}>
+                <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${statusBadge.bg}`}>
                   {statusBadge.label}
                 </span>
               )}
               {isRecent && !statusBadge && (
-                <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-green-100 text-green-700">
+                <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-700 backdrop-blur-sm">
                   Nouveau
                 </span>
               )}
               {isPopular && (
-                <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-orange-100 text-orange-700">
+                <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 backdrop-blur-sm">
                   Populaire
                 </span>
               )}
@@ -90,7 +93,7 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
             {/* Badge top-right: last unit */}
             {showLastUnit && vehicle.status === 'disponible' && (
               <div className="absolute top-3 right-12">
-                <span className="text-xs font-medium px-2 py-1 rounded-full bg-red-500 text-white">
+                <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-red-500 text-white">
                   Dernière unité
                 </span>
               </div>
@@ -98,21 +101,24 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
 
             {/* Favorite */}
             <button
-              className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors"
+              className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white hover:scale-110 transition-all"
               onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
               aria-label="Ajouter aux favoris"
             >
               <Heart className="w-4 h-4 text-gray-600" />
             </button>
 
-            {/* Views + bottom badge */}
-            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-              <div className="flex gap-1.5">
-                <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-gray-700">
-                  Vérifié DRAZONO
-                </span>
+            {/* Price overlay + views at bottom of photo */}
+            <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
+              <div>
+                <p className="text-xl font-bold text-white drop-shadow-lg tracking-tight">
+                  {formatPrice(vehicle.price_eur)} &euro;
+                </p>
+                <p className="text-[11px] text-white/70">
+                  ≈ {formatPrice(vehicle.price_fcfa || vehicle.price_eur * EUR_TO_FCFA)} FCFA
+                </p>
               </div>
-              <span className="text-xs font-medium px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center gap-1">
+              <span className="text-[11px] font-medium px-2 py-1 rounded-full bg-black/40 backdrop-blur-sm text-white/90 flex items-center gap-1">
                 <Eye className="w-3 h-3" />
                 {vehicle.views_count}
               </span>
@@ -121,27 +127,26 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
 
           {/* Info */}
           <div className="p-4">
-            <h3 className="font-semibold text-[#111827] text-base group-hover:text-[#2563EB] transition-colors">
-              {vehicle.brand} {vehicle.model} {vehicle.year}
-            </h3>
-            <p className="text-lg font-bold text-[#2563EB] mt-1">
-              {formatPrice(vehicle.price_eur)} €
-            </p>
-            <p className="text-xs text-gray-500">
-              ≈ {formatPrice(vehicle.price_fcfa || vehicle.price_eur * EUR_TO_FCFA)} FCFA
-            </p>
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="font-semibold text-[#111827] text-[15px] leading-snug group-hover:text-[#2563EB] transition-colors">
+                {vehicle.brand} {vehicle.model} {vehicle.year}
+              </h3>
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-600 shrink-0 mt-0.5">
+                Direct Chine
+              </span>
+            </div>
 
             <div className="flex items-center gap-3 mt-3 text-xs text-gray-500">
               <span className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" />
+                <Calendar className="w-3.5 h-3.5 text-gray-400" />
                 {vehicle.year}
               </span>
               <span className="flex items-center gap-1">
-                <Gauge className="w-3.5 h-3.5" />
+                <Gauge className="w-3.5 h-3.5 text-gray-400" />
                 {vehicle.mileage === 0 ? '0 km' : `${formatPrice(vehicle.mileage)} km`}
               </span>
               <span className="flex items-center gap-1">
-                <Fuel className="w-3.5 h-3.5" />
+                <Fuel className="w-3.5 h-3.5 text-gray-400" />
                 {vehicle.fuel_type}
               </span>
             </div>

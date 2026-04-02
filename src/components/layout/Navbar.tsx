@@ -39,11 +39,11 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0F172A]/80 backdrop-blur-md border-b border-white/10">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0F172A]/75 backdrop-blur-lg border-b border-white/[0.08]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="text-white font-bold text-xl tracking-tight">
-              DRAZONO
+              <span className="text-[#2563EB]">D</span>RAZONO
             </Link>
 
             <div className="hidden md:flex items-center gap-6">
@@ -51,7 +51,7 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-gray-300 hover:text-white text-sm transition-colors"
+                  className="nav-link-underline text-gray-300 hover:text-white text-sm transition-colors"
                 >
                   {link.label}
                 </Link>
