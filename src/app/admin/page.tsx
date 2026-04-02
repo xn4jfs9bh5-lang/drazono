@@ -165,7 +165,7 @@ export default function AdminPage() {
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('[ADMIN] fetch vehicles error:', error)
+      if (process.env.NODE_ENV === 'development') console.error('[ADMIN] fetch vehicles:', error)
       toast.error('Erreur lors du chargement des vehicules')
     } else {
       setVehicles(data ?? [])
@@ -205,8 +205,21 @@ export default function AdminPage() {
   // Photo handling
   // -------------------------------------------------------------------------
 
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+  const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+
   function addPhotos(files: FileList | File[]) {
-    const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'))
+    const newFiles = Array.from(files).filter(f => {
+      if (!ALLOWED_TYPES.includes(f.type)) {
+        toast.error(`Type non autorisé : ${f.name}. Seuls JPEG, PNG et WebP sont acceptés.`)
+        return false
+      }
+      if (f.size > MAX_FILE_SIZE) {
+        toast.error(`${f.name} dépasse 5 MB.`)
+        return false
+      }
+      return true
+    })
     if (newFiles.length === 0) return
     const total = photos.length + newFiles.length
     if (total > 10) {
@@ -243,14 +256,19 @@ export default function AdminPage() {
   }
 
   async function uploadPhotos(vehicleId: string): Promise<string[]> {
+    const MIME_TO_EXT: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }
     const urls: string[] = []
     for (const file of photos) {
-      const ext = file.name.split('.').pop()
-      const path = `${vehicleId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-      const { error } = await supabase.storage.from('vehicles').upload(path, file, { upsert: true })
+      const ext = MIME_TO_EXT[file.type] || 'jpg'
+      const safeName = `${Date.now()}-${crypto.randomUUID()}.${ext}`
+      const path = `${vehicleId}/${safeName}`
+      const { error } = await supabase.storage.from('vehicles').upload(path, file, {
+        upsert: true,
+        contentType: file.type,
+      })
       if (error) {
-        console.error('[ADMIN] upload error:', error)
-        toast.error(`Erreur upload: ${file.name}`)
+        if (process.env.NODE_ENV === 'development') console.error('[ADMIN] upload error:', error)
+        toast.error(`Erreur upload : ${file.name}`)
       } else {
         const { data: urlData } = supabase.storage.from('vehicles').getPublicUrl(path)
         urls.push(urlData.publicUrl)
@@ -337,11 +355,10 @@ export default function AdminPage() {
       fetchVehicles()
       fetchStats()
     } catch (err: unknown) {
-      console.error('[ADMIN] submit error:', err)
-      const e = err as { message?: string; details?: string; hint?: string; code?: string }
-      const msg = e?.message || e?.details || e?.hint || JSON.stringify(err)
-      toast.error(`Erreur: ${msg}`)
-      if (e?.code) console.error('[ADMIN] code:', e.code, 'hint:', e.hint)
+      if (process.env.NODE_ENV === 'development') console.error('[ADMIN] submit:', err)
+      const e = err as { message?: string; code?: string }
+      const msg = e?.message || 'Une erreur est survenue. Réessayez.'
+      toast.error(msg)
     } finally {
       setSubmitting(false)
     }
@@ -370,10 +387,9 @@ export default function AdminPage() {
       fetchVehicles()
       fetchStats()
     } catch (err: unknown) {
-      console.error('[ADMIN] delete error:', err)
-      const e = err as { message?: string; details?: string; hint?: string }
-      const msg = e?.message || e?.details || JSON.stringify(err)
-      toast.error(`Erreur suppression: ${msg}`)
+      if (process.env.NODE_ENV === 'development') console.error('[ADMIN] delete:', err)
+      const e = err as { message?: string }
+      toast.error(e?.message || 'Erreur lors de la suppression.')
     } finally {
       setDeleting(false)
     }

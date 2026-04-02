@@ -22,14 +22,33 @@ export async function middleware(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
+  const path = request.nextUrl.pathname
 
-  if (!user && request.nextUrl.pathname.startsWith('/espace-client')) {
+  // Protect /espace-client — requires authentication
+  if (!user && path.startsWith('/espace-client')) {
     return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  // Protect /admin — requires authentication + admin role (checked server-side)
+  if (path.startsWith('/admin')) {
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.role !== 'admin') {
+      return NextResponse.redirect(new URL('/espace-client', request.url))
+    }
   }
 
   return response
 }
 
 export const config = {
-  matcher: ['/espace-client/:path*'],
+  matcher: ['/espace-client/:path*', '/admin/:path*'],
 }
