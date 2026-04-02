@@ -126,8 +126,33 @@ export default function VehiclePage() {
 
   const images = vehicle.images?.length ? vehicle.images : []
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Car',
+    name: `${vehicle.brand} ${vehicle.model} ${vehicle.year}`,
+    brand: { '@type': 'Brand', name: vehicle.brand },
+    model: vehicle.model,
+    vehicleModelDate: String(vehicle.year),
+    mileageFromOdometer: { '@type': 'QuantitativeValue', value: vehicle.mileage, unitCode: 'KMT' },
+    fuelType: vehicle.fuel_type,
+    vehicleTransmission: vehicle.transmission,
+    color: vehicle.color,
+    numberOfDoors: vehicle.doors,
+    seatingCapacity: vehicle.seats,
+    description: vehicle.description,
+    image: images[0] || undefined,
+    offers: {
+      '@type': 'Offer',
+      price: vehicle.price_eur,
+      priceCurrency: 'EUR',
+      availability: vehicle.status === 'disponible' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      url: `https://drazono.vercel.app/vehicule/${vehicle.id}`,
+    },
+  }
+
   return (
     <div className="pt-20 pb-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <FadeIn>

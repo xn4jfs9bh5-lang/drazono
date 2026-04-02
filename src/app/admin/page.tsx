@@ -123,13 +123,11 @@ export default function AdminPage() {
 
   const checkRole = useCallback(async (userId: string) => {
     await new Promise(resolve => setTimeout(resolve, 800))
-    const { data: profile, error } = await supabase
+    const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', userId)
       .single()
-
-    console.log('[ADMIN] userId:', userId, 'role:', profile?.role, error ? `error: ${error.message}` : '')
 
     if (profile?.role === 'admin') {
       setAuthStatus('authorized')

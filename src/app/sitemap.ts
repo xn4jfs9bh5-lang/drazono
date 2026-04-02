@@ -11,8 +11,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://drazono.vercel.app'
 
   const staticPages = [
-    '', '/catalogue', '/comment-ca-marche', '/tarifs', '/a-propos',
-    '/contact', '/blog', '/login', '/register',
+    '', '/catalogue', '/comparer', '/demande', '/comment-ca-marche',
+    '/tarifs', '/a-propos', '/contact', '/blog', '/login', '/register',
     '/cgv', '/mentions-legales', '/politique-confidentialite',
   ].map((route) => ({
     url: `${baseUrl}${route}`,
