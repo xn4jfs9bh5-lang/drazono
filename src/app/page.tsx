@@ -1,4 +1,5 @@
 import HeroSection from '@/components/home/HeroSection'
+import TrustBanner from '@/components/home/TrustBanner'
 import FeaturedVehicles from '@/components/home/FeaturedVehicles'
 import BrandsSection from '@/components/home/BrandsSection'
 import HowItWorks from '@/components/home/HowItWorks'
@@ -12,6 +13,7 @@ export default function Home() {
   return (
     <>
       <HeroSection />
+      <TrustBanner />
       <FeaturedVehicles />
       <BrandsSection />
       <HowItWorks />
