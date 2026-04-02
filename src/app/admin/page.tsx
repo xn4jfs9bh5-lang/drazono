@@ -24,11 +24,19 @@ export default function AdminPage() {
   const [status, setStatus] = useState<'loading' | 'authorized' | 'denied'>('loading')
 
   const checkRole = useCallback(async (userId: string) => {
-    const { data: profile } = await supabase
+    // Petit délai pour laisser la session se stabiliser
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    const { data: profile, error } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', userId)
       .single()
+
+    console.log('[ADMIN] userId:', userId)
+    console.log('[ADMIN] profile:', profile)
+    console.log('[ADMIN] role:', profile?.role)
+    if (error) console.error('[ADMIN] error:', error)
 
     if (profile?.role === 'admin') {
       setStatus('authorized')
