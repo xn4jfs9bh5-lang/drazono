@@ -1,13 +1,16 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { BRANDS, BODY_TYPES, FUEL_TYPES } from '@/lib/constants'
-import { MOCK_VEHICLES } from '@/lib/mock-data'
+import { supabase } from '@/lib/supabase'
+import type { Vehicle } from '@/lib/types'
 import VehicleCard from '@/components/vehicles/VehicleCard'
 import FadeIn from '@/components/motion/FadeIn'
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, Loader2 } from 'lucide-react'
 
 export default function CataloguePage() {
+  const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [loading, setLoading] = useState(true)
   const [brand, setBrand] = useState('')
   const [bodyType, setBodyType] = useState('')
   const [fuelType, setFuelType] = useState('')
@@ -17,33 +20,46 @@ export default function CataloguePage() {
   const [yearMin, setYearMin] = useState('')
   const [sort, setSort] = useState('recent')
 
-  const filtered = useMemo(() => {
-    let vehicles = MOCK_VEHICLES.filter(v => v.status !== 'brouillon')
+  useEffect(() => {
+    async function fetch() {
+      const { data } = await supabase
+        .from('vehicles')
+        .select('*')
+        .in('status', ['disponible', 'vendu', 'réservé'])
+        .order('created_at', { ascending: false })
+      setVehicles(data ?? [])
+      setLoading(false)
+    }
+    fetch()
+  }, [])
 
-    if (brand) vehicles = vehicles.filter(v => v.brand === brand)
-    if (bodyType) vehicles = vehicles.filter(v => v.body_type === bodyType)
-    if (fuelType) vehicles = vehicles.filter(v => v.fuel_type === fuelType)
-    if (condition) vehicles = vehicles.filter(v => v.condition === condition)
-    if (priceMin) vehicles = vehicles.filter(v => v.price_eur >= Number(priceMin))
-    if (priceMax) vehicles = vehicles.filter(v => v.price_eur <= Number(priceMax))
-    if (yearMin) vehicles = vehicles.filter(v => v.year >= Number(yearMin))
+  const filtered = useMemo(() => {
+    let list = [...vehicles]
+
+    if (brand) list = list.filter(v => v.brand === brand)
+    if (bodyType) list = list.filter(v => v.body_type === bodyType)
+    if (fuelType) list = list.filter(v => v.fuel_type === fuelType)
+    if (condition) list = list.filter(v => v.condition === condition)
+    if (priceMin) list = list.filter(v => v.price_eur >= Number(priceMin))
+    if (priceMax) list = list.filter(v => v.price_eur <= Number(priceMax))
+    if (yearMin) list = list.filter(v => v.year >= Number(yearMin))
 
     switch (sort) {
       case 'price-asc':
-        vehicles.sort((a, b) => a.price_eur - b.price_eur)
+        list.sort((a, b) => a.price_eur - b.price_eur)
         break
       case 'price-desc':
-        vehicles.sort((a, b) => b.price_eur - a.price_eur)
+        list.sort((a, b) => b.price_eur - a.price_eur)
         break
       case 'popular':
-        vehicles.sort((a, b) => b.views_count - a.views_count)
+        list.sort((a, b) => b.views_count - a.views_count)
         break
       default:
-        vehicles.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     }
 
-    return vehicles
-  }, [brand, bodyType, fuelType, condition, priceMin, priceMax, yearMin, sort])
+    return list
+  }, [vehicles, brand, bodyType, fuelType, condition, priceMin, priceMax, yearMin, sort])
 
   const resetFilters = () => {
     setBrand('')
@@ -148,7 +164,12 @@ export default function CataloguePage() {
         </div>
 
         {/* Results */}
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-5 h-5 animate-spin text-gray-400 mr-2" />
+            <span className="text-gray-400">Chargement...</span>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-gray-400 text-lg">Aucun véhicule ne correspond à vos critères.</p>
             <button onClick={resetFilters} className="mt-4 text-[#2563EB] text-sm font-medium hover:underline">

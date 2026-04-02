@@ -1,15 +1,18 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { MOCK_VEHICLES } from '@/lib/mock-data'
+import Image from 'next/image'
+import { supabase } from '@/lib/supabase'
 import { EUR_TO_FCFA, WHATSAPP_NUMBER } from '@/lib/constants'
+import type { Vehicle } from '@/lib/types'
 import VehicleCard from '@/components/vehicles/VehicleCard'
 import FadeIn from '@/components/motion/FadeIn'
 import {
   Heart, Share2, MessageCircle, Ship, HelpCircle,
   Calendar, Gauge, Fuel, Cog, Zap, Palette,
-  Users, DoorOpen, Car, AlertTriangle, ChevronLeft
+  Users, DoorOpen, Car, AlertTriangle, ChevronLeft, Loader2
 } from 'lucide-react'
 
 function formatPrice(price: number): string {
@@ -18,7 +21,55 @@ function formatPrice(price: number): string {
 
 export default function VehiclePage() {
   const params = useParams()
-  const vehicle = MOCK_VEHICLES.find(v => v.id === params.id)
+  const [vehicle, setVehicle] = useState<Vehicle | null>(null)
+  const [similar, setSimilar] = useState<Vehicle[]>([])
+  const [loading, setLoading] = useState(true)
+  const [activeImage, setActiveImage] = useState(0)
+
+  useEffect(() => {
+    async function fetch() {
+      if (!params.id) return
+
+      const { data } = await supabase
+        .from('vehicles')
+        .select('*')
+        .eq('id', params.id)
+        .single()
+
+      setVehicle(data)
+
+      if (data) {
+        // Increment views
+        supabase
+          .from('vehicles')
+          .update({ views_count: (data.views_count || 0) + 1 })
+          .eq('id', data.id)
+          .then()
+
+        // Fetch similar
+        const { data: sim } = await supabase
+          .from('vehicles')
+          .select('*')
+          .neq('id', data.id)
+          .eq('status', 'disponible')
+          .or(`brand.eq.${data.brand},body_type.eq.${data.body_type}`)
+          .limit(4)
+        setSimilar(sim ?? [])
+      }
+
+      setLoading(false)
+    }
+    fetch()
+  }, [params.id])
+
+  if (loading) {
+    return (
+      <div className="pt-28 pb-20 flex items-center justify-center">
+        <Loader2 className="w-5 h-5 animate-spin text-gray-400 mr-2" />
+        <span className="text-gray-400">Chargement...</span>
+      </div>
+    )
+  }
 
   if (!vehicle) {
     return (
@@ -28,10 +79,6 @@ export default function VehiclePage() {
       </div>
     )
   }
-
-  const similar = MOCK_VEHICLES
-    .filter(v => v.id !== vehicle.id && (v.brand === vehicle.brand || v.body_type === vehicle.body_type))
-    .slice(0, 4)
 
   const whatsappMessages = [
     {
@@ -63,6 +110,8 @@ export default function VehiclePage() {
     { icon: Car, label: 'Carrosserie', value: vehicle.body_type },
   ]
 
+  const images = vehicle.images?.length ? vehicle.images : []
+
   return (
     <div className="pt-20 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -78,34 +127,55 @@ export default function VehiclePage() {
           {/* Gallery */}
           <FadeIn>
             <div className="relative aspect-[4/3] bg-gray-100 rounded-2xl overflow-hidden">
-              <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                <span className="text-gray-400">{vehicle.brand} {vehicle.model} — Photo principale</span>
-              </div>
+              {images.length > 0 ? (
+                <Image
+                  src={images[activeImage]}
+                  alt={`${vehicle.brand} ${vehicle.model}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  unoptimized
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                  <span className="text-gray-400">{vehicle.brand} {vehicle.model} — Pas de photo</span>
+                </div>
+              )}
               <div className="absolute top-4 left-4 flex gap-2">
                 <span className={`text-xs font-medium px-3 py-1.5 rounded-full ${vehicle.condition === 'neuf' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
                   {vehicle.condition === 'neuf' ? 'Neuf' : 'Occasion'}
                 </span>
-                <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-blue-100 text-blue-700">
-                  Vérifié DRAZONO ✓
-                </span>
-                <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-red-50 text-red-700">
-                  🇨🇳 Direct Chine
-                </span>
+                {vehicle.verified && (
+                  <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-blue-100 text-blue-700">
+                    Vérifié DRAZONO
+                  </span>
+                )}
               </div>
               {vehicle.status === 'vendu' && (
                 <div className="absolute top-4 right-4">
                   <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-red-100 text-red-700">Vendu</span>
                 </div>
               )}
-            </div>
-            {/* Thumbnails placeholder */}
-            <div className="grid grid-cols-4 gap-2 mt-2">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="aspect-[4/3] bg-gray-100 rounded-lg flex items-center justify-center">
-                  <span className="text-xs text-gray-400">Photo {i}</span>
+              {vehicle.status === 'réservé' && (
+                <div className="absolute top-4 right-4">
+                  <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-amber-100 text-amber-700">Réservé</span>
                 </div>
-              ))}
+              )}
             </div>
+            {/* Thumbnails */}
+            {images.length > 1 && (
+              <div className="grid grid-cols-4 gap-2 mt-2">
+                {images.slice(0, 4).map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveImage(i)}
+                    className={`relative aspect-[4/3] rounded-lg overflow-hidden border-2 transition-colors ${activeImage === i ? 'border-[#2563EB]' : 'border-transparent'}`}
+                  >
+                    <Image src={img} alt="" fill className="object-cover" sizes="120px" unoptimized />
+                  </button>
+                ))}
+              </div>
+            )}
           </FadeIn>
 
           {/* Info */}
@@ -119,13 +189,13 @@ export default function VehiclePage() {
                 {formatPrice(vehicle.price_eur)} €
               </p>
               <p className="text-base text-gray-500 mt-1">
-                ≈ {formatPrice(vehicle.price_eur * EUR_TO_FCFA)} FCFA
+                ≈ {formatPrice(vehicle.price_fcfa || vehicle.price_eur * EUR_TO_FCFA)} FCFA
               </p>
 
               {/* Transport notice */}
               <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
                 <p className="text-sm text-blue-800">
-                  💡 Transport en option — contactez-nous pour un devis personnalisé
+                  Transport en option — contactez-nous pour un devis personnalisé
                 </p>
               </div>
 

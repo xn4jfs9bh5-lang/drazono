@@ -1,8 +1,13 @@
 import { MetadataRoute } from 'next'
-import { MOCK_VEHICLES } from '@/lib/mock-data'
+import { createClient } from '@supabase/supabase-js'
 import { BLOG_POSTS } from '@/lib/blog-data'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://drazono.vercel.app'
 
   const staticPages = [
@@ -16,14 +21,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: route === '' ? 1 : 0.8,
   }))
 
-  const vehiclePages = MOCK_VEHICLES
-    .filter(v => v.status !== 'brouillon')
-    .map((v) => ({
-      url: `${baseUrl}/vehicule/${v.id}`,
-      lastModified: new Date(v.updated_at),
-      changeFrequency: 'daily' as const,
-      priority: 0.9,
-    }))
+  const { data: vehicles } = await supabase
+    .from('vehicles')
+    .select('id, updated_at, status')
+    .neq('status', 'brouillon')
+
+  const vehiclePages = (vehicles ?? []).map((v) => ({
+    url: `${baseUrl}/vehicule/${v.id}`,
+    lastModified: new Date(v.updated_at),
+    changeFrequency: 'daily' as const,
+    priority: 0.9,
+  }))
 
   const blogPages = BLOG_POSTS
     .filter(p => p.published)

@@ -4,8 +4,7 @@ import Link from 'next/link'
 import { Clock, ChevronLeft, Share2 } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
 import { BLOG_POSTS } from '@/lib/blog-data'
-import { MOCK_VEHICLES } from '@/lib/mock-data'
-import VehicleCard from '@/components/vehicles/VehicleCard'
+import RelatedVehicles from '@/components/vehicles/RelatedVehicles'
 
 function readingTime(content: string): number {
   const words = content.split(/\s+/).length
@@ -42,8 +41,6 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   if (!post) {
     notFound()
   }
-
-  const relatedVehicles = MOCK_VEHICLES.filter(v => v.status === 'disponible').slice(0, 4)
 
   return (
     <div className="pt-28 pb-20">
@@ -96,11 +93,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         <FadeIn delay={0.2}>
           <div className="mt-16">
             <h2 className="text-xl font-bold text-[#111827] mb-6">Véhicules disponibles</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {relatedVehicles.slice(0, 2).map(v => (
-                <VehicleCard key={v.id} vehicle={v} />
-              ))}
-            </div>
+            <RelatedVehicles limit={2} />
           </div>
         </FadeIn>
       </div>

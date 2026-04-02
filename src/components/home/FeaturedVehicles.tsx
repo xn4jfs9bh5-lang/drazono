@@ -1,13 +1,33 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Loader2 } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
 import VehicleCard from '@/components/vehicles/VehicleCard'
-import { MOCK_VEHICLES } from '@/lib/mock-data'
+import { supabase } from '@/lib/supabase'
+import type { Vehicle } from '@/lib/types'
 
 export default function FeaturedVehicles() {
-  const featured = MOCK_VEHICLES.filter(v => v.featured).slice(0, 4)
+  const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetch() {
+      const { data } = await supabase
+        .from('vehicles')
+        .select('*')
+        .eq('featured', true)
+        .eq('status', 'disponible')
+        .order('created_at', { ascending: false })
+        .limit(4)
+      setVehicles(data ?? [])
+      setLoading(false)
+    }
+    fetch()
+  }, [])
+
+  if (!loading && vehicles.length === 0) return null
 
   return (
     <section className="py-20 bg-white">
@@ -26,13 +46,20 @@ export default function FeaturedVehicles() {
           </div>
         </FadeIn>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featured.map((vehicle, i) => (
-            <FadeIn key={vehicle.id} delay={i * 0.1}>
-              <VehicleCard vehicle={vehicle} />
-            </FadeIn>
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-5 h-5 animate-spin text-gray-400 mr-2" />
+            <span className="text-gray-400">Chargement...</span>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {vehicles.map((vehicle, i) => (
+              <FadeIn key={vehicle.id} delay={i * 0.1}>
+                <VehicleCard vehicle={vehicle} />
+              </FadeIn>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )
