@@ -2,13 +2,27 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Heart, Fuel, Calendar, Gauge } from 'lucide-react'
+import { Heart, Fuel, Calendar, Gauge, Eye, Car } from 'lucide-react'
 import { Vehicle } from '@/lib/types'
 import { EUR_TO_FCFA } from '@/lib/constants'
 import { motion } from 'framer-motion'
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('fr-FR').format(price)
+}
+
+function isNew(createdAt: string): boolean {
+  const diff = Date.now() - new Date(createdAt).getTime()
+  return diff < 7 * 24 * 60 * 60 * 1000
+}
+
+function pseudoRandom(id: string): number {
+  let hash = 0
+  for (let i = 0; i < id.length; i++) {
+    hash = ((hash << 5) - hash) + id.charCodeAt(i)
+    hash |= 0
+  }
+  return Math.abs(hash) % 100
 }
 
 export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
@@ -22,31 +36,36 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
     ? { label: 'Réservé', bg: 'bg-orange-100 text-orange-700' }
     : null
 
+  const isPopular = vehicle.views_count > 10
+  const isRecent = isNew(vehicle.created_at)
+  const showLastUnit = pseudoRandom(vehicle.id) < 30
+
   return (
     <motion.div
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -4, scale: 1.02 }}
       transition={{ duration: 0.2 }}
     >
       <Link href={`/vehicule/${vehicle.id}`} className="block group">
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
           {/* Image */}
-          <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
+          <div className="relative h-56 bg-gray-100 overflow-hidden">
             {vehicle.images?.[0] ? (
               <Image
                 src={vehicle.images[0]}
-                alt={`${vehicle.brand} ${vehicle.model}`}
+                alt={`${vehicle.brand} ${vehicle.model} ${vehicle.year}`}
                 fill
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 unoptimized
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                <span className="text-gray-400 text-sm">{vehicle.brand} {vehicle.model}</span>
+              <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center">
+                <Car className="w-10 h-10 text-gray-300 mb-1" />
+                <span className="text-gray-400 text-xs">{vehicle.brand} {vehicle.model}</span>
               </div>
             )}
 
-            {/* Badges top */}
+            {/* Badges top-left */}
             <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
               <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${conditionBadge.bg}`}>
                 {conditionBadge.label}
@@ -56,17 +75,26 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
                   {statusBadge.label}
                 </span>
               )}
+              {isRecent && !statusBadge && (
+                <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-green-100 text-green-700">
+                  Nouveau
+                </span>
+              )}
+              {isPopular && (
+                <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-orange-100 text-orange-700">
+                  Populaire
+                </span>
+              )}
             </div>
 
-            {/* Badges bottom */}
-            <div className="absolute bottom-3 left-3 flex gap-1.5">
-              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-blue-100 text-blue-700">
-                Vérifié DRAZONO ✓
-              </span>
-              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-red-50 text-red-700">
-                🇨🇳 Direct Chine
-              </span>
-            </div>
+            {/* Badge top-right: last unit */}
+            {showLastUnit && vehicle.status === 'disponible' && (
+              <div className="absolute top-3 right-12">
+                <span className="text-xs font-medium px-2 py-1 rounded-full bg-red-500 text-white">
+                  Dernière unité
+                </span>
+              </div>
+            )}
 
             {/* Favorite */}
             <button
@@ -76,6 +104,19 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
             >
               <Heart className="w-4 h-4 text-gray-600" />
             </button>
+
+            {/* Views + bottom badge */}
+            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+              <div className="flex gap-1.5">
+                <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-gray-700">
+                  Vérifié DRAZONO
+                </span>
+              </div>
+              <span className="text-xs font-medium px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center gap-1">
+                <Eye className="w-3 h-3" />
+                {vehicle.views_count}
+              </span>
+            </div>
           </div>
 
           {/* Info */}

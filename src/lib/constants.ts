@@ -2,7 +2,8 @@ export const SITE_NAME = 'DRAZONO'
 export const SITE_DESCRIPTION = 'Véhicules neufs et d\'occasion depuis la Chine. Prix réel vendeur, livraison mondiale en option.'
 export const SITE_URL = 'https://drazono.vercel.app'
 
-export const WHATSAPP_NUMBER = '22600000000'
+// TODO: remplacer par le vrai numéro WhatsApp de Brayann
+export const WHATSAPP_NUMBER = '22607000000'
 export const WHATSAPP_DEFAULT_MESSAGE = 'Bonjour, je suis intéressé par un véhicule sur DRAZONO.'
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_DEFAULT_MESSAGE)}`
 

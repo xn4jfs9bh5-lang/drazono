@@ -1,16 +1,39 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { Suspense, useState, useEffect, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { BRANDS, BODY_TYPES, FUEL_TYPES } from '@/lib/constants'
 import { supabase } from '@/lib/supabase'
 import type { Vehicle } from '@/lib/types'
 import VehicleCard from '@/components/vehicles/VehicleCard'
+import VehicleCardSkeleton from '@/components/vehicles/VehicleCardSkeleton'
 import FadeIn from '@/components/motion/FadeIn'
-import { RotateCcw, Loader2 } from 'lucide-react'
+import { RotateCcw, Search, SlidersHorizontal, X } from 'lucide-react'
+import Link from 'next/link'
 
 export default function CataloguePage() {
+  return (
+    <Suspense fallback={
+      <div className="pt-20 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="h-10 bg-gray-200 rounded w-48 mb-2 animate-pulse" />
+          <div className="h-4 bg-gray-100 rounded w-72 mb-8 animate-pulse" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => <VehicleCardSkeleton key={i} />)}
+          </div>
+        </div>
+      </div>
+    }>
+      <CatalogueContent />
+    </Suspense>
+  )
+}
+
+function CatalogueContent() {
+  const searchParams = useSearchParams()
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') ?? '')
   const [brand, setBrand] = useState('')
   const [bodyType, setBodyType] = useState('')
   const [fuelType, setFuelType] = useState('')
@@ -19,6 +42,7 @@ export default function CataloguePage() {
   const [priceMax, setPriceMax] = useState('')
   const [yearMin, setYearMin] = useState('')
   const [sort, setSort] = useState('recent')
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   useEffect(() => {
     async function fetch() {
@@ -36,6 +60,12 @@ export default function CataloguePage() {
   const filtered = useMemo(() => {
     let list = [...vehicles]
 
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      list = list.filter(v =>
+        `${v.brand} ${v.model} ${v.body_type} ${v.fuel_type}`.toLowerCase().includes(q)
+      )
+    }
     if (brand) list = list.filter(v => v.brand === brand)
     if (bodyType) list = list.filter(v => v.body_type === bodyType)
     if (fuelType) list = list.filter(v => v.fuel_type === fuelType)
@@ -45,23 +75,17 @@ export default function CataloguePage() {
     if (yearMin) list = list.filter(v => v.year >= Number(yearMin))
 
     switch (sort) {
-      case 'price-asc':
-        list.sort((a, b) => a.price_eur - b.price_eur)
-        break
-      case 'price-desc':
-        list.sort((a, b) => b.price_eur - a.price_eur)
-        break
-      case 'popular':
-        list.sort((a, b) => b.views_count - a.views_count)
-        break
-      default:
-        list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      case 'price-asc': list.sort((a, b) => a.price_eur - b.price_eur); break
+      case 'price-desc': list.sort((a, b) => b.price_eur - a.price_eur); break
+      case 'popular': list.sort((a, b) => b.views_count - a.views_count); break
+      default: list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     }
 
     return list
-  }, [vehicles, brand, bodyType, fuelType, condition, priceMin, priceMax, yearMin, sort])
+  }, [vehicles, searchQuery, brand, bodyType, fuelType, condition, priceMin, priceMax, yearMin, sort])
 
   const resetFilters = () => {
+    setSearchQuery('')
     setBrand('')
     setBodyType('')
     setFuelType('')
@@ -74,88 +98,104 @@ export default function CataloguePage() {
   const selectClass = "h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
   const inputClass = "h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
 
+  const filterContent = (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+      <div className="col-span-2 sm:col-span-3 lg:col-span-4 relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Rechercher une marque, un modèle..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          className="h-10 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+        />
+      </div>
+      <select value={brand} onChange={e => setBrand(e.target.value)} className={selectClass}>
+        <option value="">Toutes les marques</option>
+        {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+      </select>
+      <select value={bodyType} onChange={e => setBodyType(e.target.value)} className={selectClass}>
+        <option value="">Type de carrosserie</option>
+        {BODY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+      </select>
+      <select value={fuelType} onChange={e => setFuelType(e.target.value)} className={selectClass}>
+        <option value="">Carburant</option>
+        {FUEL_TYPES.map(f => <option key={f} value={f}>{f}</option>)}
+      </select>
+      <select value={condition} onChange={e => setCondition(e.target.value)} className={selectClass}>
+        <option value="">État</option>
+        <option value="neuf">Neuf</option>
+        <option value="occasion">Occasion</option>
+      </select>
+      <input type="number" placeholder="Prix min (€)" value={priceMin} onChange={e => setPriceMin(e.target.value)} className={inputClass} />
+      <input type="number" placeholder="Prix max (€)" value={priceMax} onChange={e => setPriceMax(e.target.value)} className={inputClass} />
+      <select value={yearMin} onChange={e => setYearMin(e.target.value)} className={selectClass}>
+        <option value="">Année minimum</option>
+        {[2026, 2025, 2024, 2023, 2022, 2021, 2020].map(y => (
+          <option key={y} value={y}>{y}</option>
+        ))}
+      </select>
+      <button onClick={resetFilters} className="h-10 flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors">
+        <RotateCcw className="w-4 h-4" />
+        Réinitialiser
+      </button>
+    </div>
+  )
+
   return (
     <div className="pt-20 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <FadeIn>
-          <h1 className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight mb-2">
-            Catalogue
-          </h1>
-          <p className="text-gray-500 mb-8">
-            Trouvez votre véhicule chinois au meilleur prix.
-          </p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight mb-2">Catalogue</h1>
+          <p className="text-gray-500 mb-8">Trouvez votre véhicule chinois au meilleur prix.</p>
         </FadeIn>
 
-        {/* Filters */}
+        {/* Desktop filters */}
         <FadeIn delay={0.1}>
-          <div className="bg-[#FAFAFA] rounded-2xl p-4 sm:p-6 mb-8 border border-gray-100">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              <select value={brand} onChange={e => setBrand(e.target.value)} className={selectClass}>
-                <option value="">Toutes les marques</option>
-                {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
-              </select>
-
-              <select value={bodyType} onChange={e => setBodyType(e.target.value)} className={selectClass}>
-                <option value="">Type de carrosserie</option>
-                {BODY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
-
-              <select value={fuelType} onChange={e => setFuelType(e.target.value)} className={selectClass}>
-                <option value="">Carburant</option>
-                {FUEL_TYPES.map(f => <option key={f} value={f}>{f}</option>)}
-              </select>
-
-              <select value={condition} onChange={e => setCondition(e.target.value)} className={selectClass}>
-                <option value="">État</option>
-                <option value="neuf">Neuf</option>
-                <option value="occasion">Occasion</option>
-              </select>
-
-              <input
-                type="number"
-                placeholder="Prix min (€)"
-                value={priceMin}
-                onChange={e => setPriceMin(e.target.value)}
-                className={inputClass}
-              />
-
-              <input
-                type="number"
-                placeholder="Prix max (€)"
-                value={priceMax}
-                onChange={e => setPriceMax(e.target.value)}
-                className={inputClass}
-              />
-
-              <select value={yearMin} onChange={e => setYearMin(e.target.value)} className={selectClass}>
-                <option value="">Année minimum</option>
-                {[2026, 2025, 2024, 2023, 2022, 2021, 2020].map(y => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
-
-              <button
-                onClick={resetFilters}
-                className="h-10 flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors"
-              >
-                <RotateCcw className="w-4 h-4" />
-                Réinitialiser
-              </button>
-            </div>
+          <div className="hidden sm:block bg-[#FAFAFA] rounded-2xl p-4 sm:p-6 mb-8 border border-gray-100">
+            {filterContent}
           </div>
         </FadeIn>
+
+        {/* Mobile filter button */}
+        <div className="sm:hidden mb-4">
+          <button
+            onClick={() => setMobileFiltersOpen(true)}
+            className="flex items-center gap-2 h-10 px-4 bg-[#FAFAFA] border border-gray-200 rounded-lg text-sm text-gray-700 w-full justify-center"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            Filtres
+          </button>
+        </div>
+
+        {/* Mobile bottom sheet */}
+        {mobileFiltersOpen && (
+          <>
+            <div className="fixed inset-0 z-50 bg-black/40 sm:hidden" onClick={() => setMobileFiltersOpen(false)} />
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl p-6 max-h-[80vh] overflow-y-auto sm:hidden">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-[#111827]">Filtres</h3>
+                <button onClick={() => setMobileFiltersOpen(false)} aria-label="Fermer les filtres">
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              {filterContent}
+              <button
+                onClick={() => setMobileFiltersOpen(false)}
+                className="mt-4 w-full h-10 bg-[#2563EB] text-white rounded-lg text-sm font-medium"
+              >
+                Voir {filtered.length} résultat{filtered.length > 1 ? 's' : ''}
+              </button>
+            </div>
+          </>
+        )}
 
         {/* Sort + Count */}
         <div className="flex items-center justify-between mb-6">
           <p className="text-sm text-gray-500">
-            <span className="font-semibold text-[#111827]">{filtered.length}</span> véhicule{filtered.length > 1 ? 's' : ''} trouvé{filtered.length > 1 ? 's' : ''}
+            <span className="font-semibold text-[#111827]">{loading ? '...' : filtered.length}</span> véhicule{filtered.length > 1 ? 's' : ''} trouvé{filtered.length > 1 ? 's' : ''}
           </p>
-          <select
-            value={sort}
-            onChange={e => setSort(e.target.value)}
-            className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
-          >
+          <select value={sort} onChange={e => setSort(e.target.value)} className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563EB]">
             <option value="recent">Plus récent</option>
             <option value="price-asc">Prix croissant</option>
             <option value="price-desc">Prix décroissant</option>
@@ -165,9 +205,8 @@ export default function CataloguePage() {
 
         {/* Results */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-5 h-5 animate-spin text-gray-400 mr-2" />
-            <span className="text-gray-400">Chargement...</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => <VehicleCardSkeleton key={i} />)}
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
@@ -175,6 +214,11 @@ export default function CataloguePage() {
             <button onClick={resetFilters} className="mt-4 text-[#2563EB] text-sm font-medium hover:underline">
               Réinitialiser les filtres
             </button>
+            <div className="mt-6">
+              <Link href="/demande" className="inline-flex items-center gap-2 bg-[#2563EB] text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors">
+                Faire une demande personnalisée
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

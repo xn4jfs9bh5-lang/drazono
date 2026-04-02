@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Loader2 } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
 import VehicleCard from '@/components/vehicles/VehicleCard'
+import VehicleCardSkeleton from '@/components/vehicles/VehicleCardSkeleton'
 import { supabase } from '@/lib/supabase'
 import type { Vehicle } from '@/lib/types'
 
@@ -46,20 +47,16 @@ export default function FeaturedVehicles() {
           </div>
         </FadeIn>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-5 h-5 animate-spin text-gray-400 mr-2" />
-            <span className="text-gray-400">Chargement...</span>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {vehicles.map((vehicle, i) => (
-              <FadeIn key={vehicle.id} delay={i * 0.1}>
-                <VehicleCard vehicle={vehicle} />
-              </FadeIn>
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {loading
+            ? Array.from({ length: 4 }).map((_, i) => <VehicleCardSkeleton key={i} />)
+            : vehicles.map((vehicle, i) => (
+                <FadeIn key={vehicle.id} delay={i * 0.1}>
+                  <VehicleCard vehicle={vehicle} />
+                </FadeIn>
+              ))
+          }
+        </div>
       </div>
     </section>
   )
