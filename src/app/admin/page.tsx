@@ -273,13 +273,11 @@ export default function AdminPage() {
 
     setSubmitting(true)
     try {
-      const priceFcfa = Math.round(form.price_eur * EUR_TO_FCFA)
       const vehicleData = {
         brand: form.brand,
         model: form.model.trim(),
         year: form.year,
         price_eur: form.price_eur,
-        price_fcfa: priceFcfa,
         mileage: form.mileage,
         fuel_type: form.fuel_type,
         transmission: form.transmission,
