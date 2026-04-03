@@ -1,8 +1,7 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import FadeIn from '@/components/motion/FadeIn'
-import { useInView } from 'framer-motion'
 
 const savings = [
   { model: 'BYD Seal EV', europe: 35000, drazono: 18500, percent: 47 },
@@ -17,11 +16,24 @@ function formatPrice(n: number) {
 
 function AnimatedPercent({ value }: { value: number }) {
   const ref = useRef<HTMLSpanElement>(null)
-  const isInView = useInView(ref, { once: true })
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect() } },
+      { threshold: 0.1 }
+    )
+    observer.observe(el)
+    // Fallback after 3s
+    const timer = setTimeout(() => setVisible(true), 3000)
+    return () => { observer.disconnect(); clearTimeout(timer) }
+  }, [])
 
   return (
     <span ref={ref} className="inline-flex items-center gap-1 text-emerald-700 font-bold text-base">
-      -{isInView ? value : 0}%
+      -{visible ? value : 0}%
     </span>
   )
 }

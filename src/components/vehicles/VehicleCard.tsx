@@ -1,10 +1,13 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Heart, Fuel, Calendar, Gauge, Eye, Car, Ship } from 'lucide-react'
 import { Vehicle } from '@/lib/types'
 import { EUR_TO_FCFA } from '@/lib/constants'
+import { supabase } from '@/lib/supabase'
+import { toast } from 'sonner'
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('fr-FR').format(price)
@@ -25,6 +28,9 @@ function pseudoRandom(id: string): number {
 }
 
 export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
+  const [favorited, setFavorited] = useState(false)
+  const [loadingFav, setLoadingFav] = useState(false)
+
   const conditionBadge = vehicle.condition === 'neuf'
     ? { label: 'Neuf', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200' }
     : { label: 'Occasion', className: 'bg-amber-50 text-amber-700 border border-amber-200' }
@@ -37,7 +43,64 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
 
   const isPopular = vehicle.views_count > 10
   const isRecent = isNew(vehicle.created_at)
+  // BUG 5 FIX: Only show "Nouveau" badge if condition is 'neuf' AND recently added
+  const showNewBadge = isRecent && vehicle.condition === 'neuf'
   const showLastUnit = pseudoRandom(vehicle.id) < 30
+
+  // Check if user has favorited this vehicle
+  useEffect(() => {
+    async function checkFavorite() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase
+        .from('favorites')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('vehicle_id', vehicle.id)
+        .maybeSingle()
+      if (data) setFavorited(true)
+    }
+    checkFavorite()
+  }, [vehicle.id])
+
+  const toggleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (loadingFav) return
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
+      return
+    }
+
+    // Optimistic update
+    setFavorited(!favorited)
+    setLoadingFav(true)
+
+    try {
+      const res = await fetch('/api/favorites/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vehicle_id: vehicle.id }),
+      })
+
+      if (!res.ok) {
+        setFavorited(favorited) // revert
+        toast.error('Erreur lors de la mise à jour')
+        return
+      }
+
+      const data = await res.json()
+      setFavorited(data.favorited)
+      toast.success(data.favorited ? 'Ajouté aux favoris' : 'Retiré des favoris')
+    } catch {
+      setFavorited(favorited) // revert
+      toast.error('Erreur réseau')
+    } finally {
+      setLoadingFav(false)
+    }
+  }
 
   return (
     <Link href={`/vehicule/${vehicle.id}`} className="block group">
@@ -73,7 +136,7 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
                 {statusBadge.label}
               </span>
             )}
-            {isRecent && !statusBadge && (
+            {showNewBadge && !statusBadge && (
               <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-700 backdrop-blur-sm">
                 Nouveau
               </span>
@@ -97,10 +160,10 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
           {/* Favorite */}
           <button
             className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white hover:scale-110 transition-all"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
-            aria-label="Ajouter aux favoris"
+            onClick={toggleFavorite}
+            aria-label={favorited ? 'Retirer des favoris' : 'Ajouter aux favoris'}
           >
-            <Heart className="w-4 h-4 text-gray-600" />
+            <Heart className={`w-4 h-4 transition-colors ${favorited ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
           </button>
 
           {/* Views at bottom-right of photo */}

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { WHATSAPP_NUMBER } from '@/lib/constants'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://drazono.vercel.app'
-const WHATSAPP_NUMBER = '22607000000'
 
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get('x-cron-secret')

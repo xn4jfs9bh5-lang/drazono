@@ -3,9 +3,11 @@ export const SITE_DESCRIPTION = 'Véhicules neufs et d\'occasion depuis la Chine
 export const SITE_URL = 'https://drazono.vercel.app'
 
 // TODO: remplacer par le vrai numéro WhatsApp de Brayann
-export const WHATSAPP_NUMBER = '22607000000'
+// Set NEXT_PUBLIC_WHATSAPP_NUMBER in .env.local to override
+export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '22607000000'
 export const WHATSAPP_DEFAULT_MESSAGE = 'Bonjour, je suis intéressé par un véhicule sur DRAZONO.'
-export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_DEFAULT_MESSAGE)}`
+export const WHATSAPP_BASE = `https://wa.me/${WHATSAPP_NUMBER}`
+export const WHATSAPP_URL = `${WHATSAPP_BASE}?text=${encodeURIComponent(WHATSAPP_DEFAULT_MESSAGE)}`
 
 export const CONTACT_EMAIL = 'contact@drazono.com'
 

@@ -5,6 +5,8 @@ import { User, Heart, Bell, Clock, FileText, LogOut } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
 import { supabase } from '@/lib/supabase'
 import { BRANDS, BODY_TYPES, FUEL_TYPES } from '@/lib/constants'
+import type { Vehicle } from '@/lib/types'
+import VehicleCard from '@/components/vehicles/VehicleCard'
 import RecommendedVehicles from '@/components/vehicles/RecommendedVehicles'
 
 const tabs = [
@@ -21,6 +23,8 @@ export default function EspaceClientPage() {
   const [profile, setProfile] = useState({ name: '', email: '', phone: '', country: '', city: '' })
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
+  const [favorites, setFavorites] = useState<Vehicle[]>([])
+  const [favLoading, setFavLoading] = useState(false)
 
   useEffect(() => {
     async function loadProfile() {
@@ -80,6 +84,29 @@ export default function EspaceClientPage() {
     setSaving(false)
     setSaveMsg(error ? 'Erreur lors de la sauvegarde.' : 'Profil mis à jour !')
   }
+
+  // Fetch favorites when tab is active
+  useEffect(() => {
+    if (activeTab !== 'favorites') return
+    async function loadFavorites() {
+      setFavLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setFavLoading(false); return }
+      const { data } = await supabase
+        .from('favorites')
+        .select('vehicle_id, vehicles(*)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+      const vehicleList: Vehicle[] = []
+      for (const f of data ?? []) {
+        const v = f.vehicles as unknown as Vehicle | null
+        if (v && !Array.isArray(v)) vehicleList.push(v)
+      }
+      setFavorites(vehicleList)
+      setFavLoading(false)
+    }
+    loadFavorites()
+  }, [activeTab])
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -207,11 +234,21 @@ export default function EspaceClientPage() {
               {activeTab === 'favorites' && (
                 <div>
                   <h2 className="text-lg font-bold text-[#111827] mb-6">Mes favoris</h2>
-                  <div className="text-center py-12">
-                    <Heart className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-                    <p className="text-gray-400">Aucun favori pour le moment.</p>
-                    <p className="text-sm text-gray-400 mt-1">Cliquez sur le coeur d&apos;un véhicule pour l&apos;ajouter.</p>
-                  </div>
+                  {favLoading ? (
+                    <p className="text-gray-400 text-center py-12">Chargement...</p>
+                  ) : favorites.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Heart className="w-12 h-12 text-gray-200 mx-auto mb-3" />
+                      <p className="text-gray-400">Aucun favori pour le moment.</p>
+                      <p className="text-sm text-gray-400 mt-1">Cliquez sur le coeur d&apos;un véhicule pour l&apos;ajouter.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {favorites.map(v => (
+                        <VehicleCard key={v.id} vehicle={v} />
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
