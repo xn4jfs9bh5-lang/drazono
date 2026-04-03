@@ -15,11 +15,15 @@ export const EUR_TO_FCFA = 656
 
 export const BRANDS = [
   'BYD', 'Chery', 'Geely', 'Great Wall', 'Haval', 'JAC Motors',
-  'Dongfeng', 'BAIC', 'Changan', 'MG', 'NIO', 'Xpeng', 'Li Auto'
+  'Dongfeng', 'BAIC', 'Changan', 'MG', 'NIO', 'Xpeng', 'Li Auto',
+  'AITO', 'Zeekr', 'Voyah', 'Ora', 'Wuling', 'SAIC', 'Lynk & Co',
+  'Denza', 'Avatr', 'Jaecoo', 'Omoda', 'Deepal', 'Neta',
+  'Leapmotor', 'Hozon', 'Aion', 'GAC', 'Roewe', 'Baojun',
 ] as const
 
 export const BODY_TYPES = [
-  'SUV', 'Berline', 'Pick-up', 'Citadine', 'Utilitaire'
+  'SUV', 'Berline', 'Citadine', 'Pick-up', 'Coupé', 'Cabriolet',
+  'Monospace', 'Break', 'Utilitaire', 'Camionnette',
 ] as const
 
 export const FUEL_TYPES = [

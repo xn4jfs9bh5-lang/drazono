@@ -721,13 +721,21 @@ export default function AdminPage() {
                 </h3>
                 <div className="space-y-5 max-w-3xl">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Brand */}
+                    {/* Brand — free text with suggestions */}
                     <div>
                       <label className={labelClass}>Marque *</label>
-                      <select value={form.brand} onChange={e => setForm(f => ({ ...f, brand: e.target.value }))} className={inputClass}>
-                        <option value="">Selectionner</option>
-                        {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
-                      </select>
+                      <input
+                        type="text"
+                        list="brand-suggestions"
+                        value={form.brand}
+                        onChange={e => setForm(f => ({ ...f, brand: e.target.value }))}
+                        className={inputClass}
+                        placeholder="Tapez ou selectionnez une marque"
+                        autoComplete="off"
+                      />
+                      <datalist id="brand-suggestions">
+                        {BRANDS.map(b => <option key={b} value={b} />)}
+                      </datalist>
                     </div>
                     {/* Model */}
                     <div>
@@ -786,12 +794,21 @@ export default function AdminPage() {
                       <label className={labelClass}>Portes</label>
                       <input type="number" value={form.doors} onChange={e => setForm(f => ({ ...f, doors: Number(e.target.value) }))} className={inputClass} />
                     </div>
-                    {/* Body type */}
+                    {/* Body type — free text with suggestions */}
                     <div>
                       <label className={labelClass}>Carrosserie</label>
-                      <select value={form.body_type} onChange={e => setForm(f => ({ ...f, body_type: e.target.value }))} className={inputClass}>
-                        {BODY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                      </select>
+                      <input
+                        type="text"
+                        list="bodytype-suggestions"
+                        value={form.body_type}
+                        onChange={e => setForm(f => ({ ...f, body_type: e.target.value }))}
+                        className={inputClass}
+                        placeholder="Tapez ou selectionnez un type"
+                        autoComplete="off"
+                      />
+                      <datalist id="bodytype-suggestions">
+                        {BODY_TYPES.map(t => <option key={t} value={t} />)}
+                      </datalist>
                     </div>
                     {/* Condition */}
                     <div>
