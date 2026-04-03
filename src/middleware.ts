@@ -31,8 +31,13 @@ export async function middleware(request: NextRequest) {
 
   // Protect /admin — requires authentication + admin role (checked server-side)
   if (path.startsWith('/admin')) {
+    // Allow access to admin login page without auth
+    if (path === '/admin/login') {
+      return response
+    }
+
     if (!user) {
-      return NextResponse.redirect(new URL('/login', request.url))
+      return NextResponse.redirect(new URL('/admin/login', request.url))
     }
 
     const { data: profile } = await supabase

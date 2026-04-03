@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Car, Users, MessageSquare, Bell, Plus,
   Eye, Heart, TrendingUp, Trash2, Edit3, Search, X, Upload,
   CheckCircle, AlertTriangle, Loader2, ChevronDown, Image as ImageIcon,
-  Filter, RefreshCw, BarChart3
+  Filter, RefreshCw, BarChart3, LogOut
 } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
 import AnalyticsTab from '@/components/admin/AnalyticsTab'
@@ -148,7 +148,7 @@ export default function AdminPage() {
       if (event === 'INITIAL_SESSION') {
         if (!session) {
           redirected = true
-          window.location.href = '/login'
+          window.location.href = '/admin/login'
         } else {
           checkRole(session.user.id)
         }
@@ -498,7 +498,19 @@ export default function AdminPage() {
         <FadeIn>
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-2xl font-bold text-[#111827] tracking-tight">Panel Admin</h1>
-            <span className="text-xs font-medium px-3 py-1 bg-red-100 text-red-700 rounded-full">Admin</span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-medium px-3 py-1 bg-red-100 text-red-700 rounded-full">Admin</span>
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut()
+                  window.location.href = '/admin/login'
+                }}
+                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-red-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                Déconnexion
+              </button>
+            </div>
           </div>
         </FadeIn>
 

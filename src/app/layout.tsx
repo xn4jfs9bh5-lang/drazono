@@ -1,10 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import Navbar from '@/components/layout/Navbar'
-import Footer from '@/components/layout/Footer'
-import WhatsAppButton from '@/components/layout/WhatsAppButton'
-import ScrollToTop from '@/components/layout/ScrollToTop'
+import LayoutShell from '@/components/layout/LayoutShell'
 import AnalyticsTracker from '@/components/layout/AnalyticsTracker'
 import { Toaster } from 'sonner'
 
@@ -45,13 +42,9 @@ export default function RootLayout({
   return (
     <html lang="fr" className={inter.variable}>
       <body className="font-sans antialiased bg-white text-[#111827]">
-        <Navbar />
-        <main className="min-h-screen">
+        <LayoutShell>
           {children}
-        </main>
-        <Footer />
-        <WhatsAppButton />
-        <ScrollToTop />
+        </LayoutShell>
         <AnalyticsTracker />
         <Toaster position="top-right" richColors closeButton />
       </body>
