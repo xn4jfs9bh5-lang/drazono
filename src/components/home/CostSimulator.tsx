@@ -36,7 +36,7 @@ export default function CostSimulator() {
   const waMsg = `Bonjour, je souhaite un devis précis pour un véhicule à ${fmt(price)}€ livré au ${country.name}. Merci !`
 
   return (
-    <section className="py-20 bg-[#FAFAFA]">
+    <section id="simulateur" className="py-20 bg-[#FAFAFA]">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn>
           <div className="text-center mb-10">

@@ -137,10 +137,10 @@ export default function HeroSection() {
             Explorer le catalogue
           </Link>
           <Link
-            href="/comment-ca-marche"
+            href="/#simulateur"
             className="inline-flex items-center justify-center border border-white/25 text-white px-8 py-3.5 rounded-full font-semibold text-sm hover:bg-white/10 transition-colors"
           >
-            Comment ça marche
+            Voir les prix
           </Link>
         </motion.div>
       </div>
