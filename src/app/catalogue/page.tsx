@@ -8,8 +8,9 @@ import type { Vehicle } from '@/lib/types'
 import VehicleCard from '@/components/vehicles/VehicleCard'
 import VehicleCardSkeleton from '@/components/vehicles/VehicleCardSkeleton'
 import FadeIn from '@/components/motion/FadeIn'
-import { RotateCcw, Search, SlidersHorizontal, X } from 'lucide-react'
+import { RotateCcw, Search, SlidersHorizontal, X, Rocket, MessageCircle, Bell } from 'lucide-react'
 import Link from 'next/link'
+import { WHATSAPP_NUMBER } from '@/lib/constants'
 
 export default function CataloguePage() {
   return (
@@ -208,15 +209,78 @@ function CatalogueContent() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, i) => <VehicleCardSkeleton key={i} />)}
           </div>
+        ) : vehicles.length === 0 ? (
+          /* Catalogue completely empty — launch state */
+          <div className="text-center py-16">
+            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-5">
+              <Rocket className="w-8 h-8 text-[#2563EB]" />
+            </div>
+            <h2 className="text-xl font-bold text-[#111827] mb-2">
+              Nous pr&eacute;parons notre premier stock
+            </h2>
+            <p className="text-gray-500 mb-8 max-w-md mx-auto">
+              Soyez parmi les premiers &agrave; &ecirc;tre alert&eacute;. Inscrivez-vous pour recevoir une notification d&egrave;s qu&apos;un v&eacute;hicule est disponible.
+            </p>
+
+            {/* Alert form */}
+            <div className="max-w-sm mx-auto mb-8">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  const formData = new FormData(e.currentTarget)
+                  const email = formData.get('alert-email')
+                  if (email) {
+                    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Bonjour, je souhaite être alerté dès qu'un véhicule est disponible. Mon email : ${email}`)}`, '_blank')
+                  }
+                }}
+                className="flex gap-2"
+              >
+                <input
+                  name="alert-email"
+                  type="email"
+                  required
+                  placeholder="votre@email.com"
+                  className="flex-1 h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                />
+                <button
+                  type="submit"
+                  className="h-11 px-5 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shrink-0"
+                >
+                  <Bell className="w-4 h-4" />
+                  M&apos;alerter
+                </button>
+              </form>
+            </div>
+
+            {/* Marques disponibles prochainement */}
+            <div className="mb-8">
+              <p className="text-sm text-gray-400 mb-3">Marques disponibles prochainement</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {BRANDS.map(b => (
+                  <span key={b} className="text-xs px-3 py-1.5 bg-gray-50 border border-gray-100 rounded-full text-gray-600">{b}</span>
+                ))}
+              </div>
+            </div>
+
+            <a
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour, je souhaite être contacté en priorité dès qu\'un véhicule est disponible sur DRAZONO.')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20BD5A] text-white px-6 py-3 rounded-full text-sm font-medium transition-colors"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Me contacter en priorit&eacute;
+            </a>
+          </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-gray-400 text-lg">Aucun véhicule ne correspond à vos critères.</p>
+            <p className="text-gray-400 text-lg">Aucun v&eacute;hicule ne correspond &agrave; vos crit&egrave;res.</p>
             <button onClick={resetFilters} className="mt-4 text-[#2563EB] text-sm font-medium hover:underline">
-              Réinitialiser les filtres
+              R&eacute;initialiser les filtres
             </button>
             <div className="mt-6">
               <Link href="/demande" className="inline-flex items-center gap-2 bg-[#2563EB] text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors">
-                Faire une demande personnalisée
+                Faire une demande personnalis&eacute;e
               </Link>
             </div>
           </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { Search, MessageCircle, ShieldCheck, CreditCard, ShoppingCart, Ship } from 'lucide-react'
+import { Search, MessageCircle, ShieldCheck, CreditCard, ShoppingCart, Ship, Clock, Banknote, RefreshCw, Timer, Landmark } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 
@@ -9,31 +9,43 @@ const steps = [
     icon: Search,
     title: 'Explorez le catalogue',
     description: 'Parcourez nos véhicules vérifiés. Filtrez par marque, budget, type de carrosserie. Chaque véhicule a été sélectionné et vérifié par notre équipe.',
+    delay: '0-24h',
+    delayLabel: 'Vérification vendeur',
   },
   {
     icon: MessageCircle,
     title: 'Contactez-nous sur WhatsApp',
     description: 'Posez vos questions, demandez des infos supplémentaires, des photos ou vidéos récentes. Réponse en moins de 2 heures, 7j/7.',
+    delay: '24-48h',
+    delayLabel: 'Confirmation disponibilité',
   },
   {
     icon: ShieldCheck,
     title: 'Vérification en Chine',
     description: 'On contacte le vendeur chinois via WeChat pour confirmer la disponibilité, le prix exact, et obtenir des photos/vidéos récentes du véhicule.',
+    delay: '48-72h',
+    delayLabel: 'Signature proforma',
   },
   {
     icon: CreditCard,
     title: 'Confirmez et versez l\'acompte',
     description: 'Une fois satisfait, confirmez votre commande. Un acompte de 10% sécurise le véhicule. Vous recevez une facture proforma détaillée.',
+    delay: '1-2 semaines',
+    delayLabel: 'Préparation export',
   },
   {
     icon: ShoppingCart,
     title: 'Commande au vendeur',
     description: 'On finalise l\'achat auprès du vendeur chinois. Vous recevez une confirmation et un suivi de votre commande.',
+    delay: '30-60 jours',
+    delayLabel: 'Transport maritime',
   },
   {
     icon: Ship,
     title: 'Livraison (optionnelle)',
     description: 'Si vous souhaitez le transport, on organise l\'expédition maritime jusqu\'à votre port ou ville de destination. Devis personnalisé selon votre localisation.',
+    delay: '1-2 semaines',
+    delayLabel: 'Dédouanement local',
   },
 ]
 
@@ -98,10 +110,16 @@ export default function CommentCaMarchePage() {
                     <step.icon className="w-6 h-6 text-[#2563EB]" />
                   </div>
                 </div>
-                <div>
-                  <span className="text-xs font-bold text-[#2563EB] block mb-1">
-                    Étape {i + 1}
-                  </span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-1 flex-wrap">
+                    <span className="text-xs font-bold text-[#2563EB]">
+                      Étape {i + 1}
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                      <Clock className="w-3 h-3" />
+                      {step.delay} — {step.delayLabel}
+                    </span>
+                  </div>
                   <h3 className="text-lg font-semibold text-[#111827] mb-2">{step.title}</h3>
                   <p className="text-gray-500 leading-relaxed">{step.description}</p>
                 </div>
@@ -109,6 +127,65 @@ export default function CommentCaMarchePage() {
             </FadeIn>
           ))}
         </div>
+
+        {/* Transparence financière */}
+        <FadeIn delay={0.5}>
+          <div className="bg-[#0F172A] rounded-2xl p-8 sm:p-10 mb-20">
+            <div className="text-center mb-8">
+              <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Banknote className="w-7 h-7 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-white tracking-tight mb-2">
+                Comment on gère votre argent
+              </h2>
+              <p className="text-gray-400 max-w-lg mx-auto">
+                Transparence totale sur le processus financier.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl mx-auto">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <CreditCard className="w-5 h-5 text-[#2563EB]" />
+                  <h3 className="text-sm font-semibold text-white">Acompte</h3>
+                </div>
+                <p className="text-xs text-gray-400 leading-relaxed">10% à la commande pour sécuriser le véhicule</p>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <ShieldCheck className="w-5 h-5 text-[#2563EB]" />
+                  <h3 className="text-sm font-semibold text-white">Solde</h3>
+                </div>
+                <p className="text-xs text-gray-400 leading-relaxed">Payé avant expédition, après confirmation finale</p>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <RefreshCw className="w-5 h-5 text-emerald-400" />
+                  <h3 className="text-sm font-semibold text-white">Remboursement</h3>
+                </div>
+                <p className="text-xs text-gray-400 leading-relaxed">Intégral si véhicule indisponible</p>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <Timer className="w-5 h-5 text-amber-400" />
+                  <h3 className="text-sm font-semibold text-white">Délai remboursement</h3>
+                </div>
+                <p className="text-xs text-gray-400 leading-relaxed">Sous 48h ouvrées maximum</p>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-5 sm:col-span-2 lg:col-span-2">
+                <div className="flex items-center gap-3 mb-2">
+                  <Landmark className="w-5 h-5 text-[#2563EB]" />
+                  <h3 className="text-sm font-semibold text-white">Mode de paiement</h3>
+                </div>
+                <p className="text-xs text-gray-400 leading-relaxed">Virement bancaire international — traçable et sécurisé</p>
+              </div>
+            </div>
+          </div>
+        </FadeIn>
 
         {/* FAQ */}
         <FadeIn>

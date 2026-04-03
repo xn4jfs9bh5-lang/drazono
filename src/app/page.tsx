@@ -6,6 +6,7 @@ import HowItWorks from '@/components/home/HowItWorks'
 import CostSimulator from '@/components/home/CostSimulator'
 import SavingsSection from '@/components/home/SavingsSection'
 import Testimonials from '@/components/home/Testimonials'
+import TrustProof from '@/components/home/TrustProof'
 import FounderSection from '@/components/home/FounderSection'
 import NewsletterSection from '@/components/home/NewsletterSection'
 
@@ -20,6 +21,7 @@ export default function Home() {
       <SavingsSection />
       <CostSimulator />
       <Testimonials />
+      <TrustProof />
       <FounderSection />
       <div id="newsletter">
         <NewsletterSection />

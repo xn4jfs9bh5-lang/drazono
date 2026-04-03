@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
-import { Check, X, Video, Ship, FileCheck } from 'lucide-react'
+import { Check, X, Video, Ship, FileCheck, MessageCircle, Users, Package } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
+import { WHATSAPP_NUMBER } from '@/lib/constants'
 
 export const metadata: Metadata = {
   title: 'Tarifs et services — DRAZONO',
@@ -115,7 +116,7 @@ export default function TarifsPage() {
           </h2>
         </FadeIn>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
           {optionalServices.map((service, i) => (
             <FadeIn key={i} delay={0.3 + i * 0.08}>
               <div className="bg-[#FAFAFA] rounded-2xl border border-gray-100 p-6 text-center">
@@ -128,6 +129,49 @@ export default function TarifsPage() {
             </FadeIn>
           ))}
         </div>
+
+        {/* Section B2B */}
+        <FadeIn delay={0.4}>
+          <div className="bg-[#0F172A] rounded-2xl p-8 sm:p-10 text-center">
+            <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-5">
+              <Users className="w-7 h-7 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-white tracking-tight mb-3">
+              Vous êtes revendeur ou professionnel ?
+            </h2>
+            <p className="text-gray-400 max-w-lg mx-auto mb-8">
+              Conditions avantageuses pour les commandes en volume.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 max-w-2xl mx-auto">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                <Package className="w-5 h-5 text-[#2563EB] mx-auto mb-2" />
+                <p className="text-sm text-white font-medium">Commande groupée</p>
+                <p className="text-xs text-gray-400 mt-1">À partir de 3 véhicules</p>
+              </div>
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                <FileCheck className="w-5 h-5 text-[#2563EB] mx-auto mb-2" />
+                <p className="text-sm text-white font-medium">Devis personnalisé B2B</p>
+                <p className="text-xs text-gray-400 mt-1">Adapté à vos besoins</p>
+              </div>
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                <Check className="w-5 h-5 text-[#2563EB] mx-auto mb-2" />
+                <p className="text-sm text-white font-medium">Conditions négociables</p>
+                <p className="text-xs text-gray-400 mt-1">Tarifs dégressifs sur volume</p>
+              </div>
+            </div>
+
+            <a
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Bonjour, je suis revendeur et souhaite un devis pour [X] véhicules. Merci de me recontacter.')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20BD5A] text-white px-8 py-3.5 rounded-full font-medium transition-colors"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Demander un devis B2B sur WhatsApp
+            </a>
+          </div>
+        </FadeIn>
       </div>
     </div>
   )
