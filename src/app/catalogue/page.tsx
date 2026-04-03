@@ -96,8 +96,8 @@ function CatalogueContent() {
     setYearMin('')
   }
 
-  const selectClass = "h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
-  const inputClass = "h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
+  const selectClass = "h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+  const inputClass = "h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
 
   const filterContent = (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -108,7 +108,7 @@ function CatalogueContent() {
           placeholder="Rechercher une marque, un modèle..."
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          className="h-10 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+          className="h-10 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-500"
         />
       </div>
       <select value={brand} onChange={e => setBrand(e.target.value)} className={selectClass}>
@@ -136,7 +136,7 @@ function CatalogueContent() {
           <option key={y} value={y}>{y}</option>
         ))}
       </select>
-      <button onClick={resetFilters} className="h-10 flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors">
+      <button onClick={resetFilters} className="h-10 flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-600 hover:text-gray-700 hover:border-gray-300 transition-colors">
         <RotateCcw className="w-4 h-4" />
         Réinitialiser
       </button>
@@ -148,7 +148,7 @@ function CatalogueContent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn>
           <h1 className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight mb-2">Catalogue</h1>
-          <p className="text-gray-500 mb-8">Trouvez votre véhicule chinois au meilleur prix.</p>
+          <p className="text-gray-600 mb-8">Trouvez votre véhicule chinois au meilleur prix.</p>
         </FadeIn>
 
         {/* Desktop filters */}
@@ -177,13 +177,13 @@ function CatalogueContent() {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-[#111827]">Filtres</h3>
                 <button onClick={() => setMobileFiltersOpen(false)} aria-label="Fermer les filtres">
-                  <X className="w-5 h-5 text-gray-500" />
+                  <X className="w-5 h-5 text-gray-600" />
                 </button>
               </div>
               {filterContent}
               <button
                 onClick={() => setMobileFiltersOpen(false)}
-                className="mt-4 w-full h-10 bg-[#2563EB] text-white rounded-lg text-sm font-medium"
+                className="mt-4 w-full h-10 bg-brand-500 text-white rounded-lg text-sm font-medium"
               >
                 Voir {filtered.length} résultat{filtered.length > 1 ? 's' : ''}
               </button>
@@ -193,10 +193,10 @@ function CatalogueContent() {
 
         {/* Sort + Count */}
         <div className="flex items-center justify-between mb-6">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-600">
             <span className="font-semibold text-[#111827]">{loading ? '...' : filtered.length}</span> véhicule{filtered.length > 1 ? 's' : ''} trouvé{filtered.length > 1 ? 's' : ''}
           </p>
-          <select value={sort} onChange={e => setSort(e.target.value)} className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2563EB]">
+          <select value={sort} onChange={e => setSort(e.target.value)} className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-500">
             <option value="recent">Plus récent</option>
             <option value="price-asc">Prix croissant</option>
             <option value="price-desc">Prix décroissant</option>
@@ -213,12 +213,12 @@ function CatalogueContent() {
           /* Catalogue completely empty — launch state */
           <div className="text-center py-16">
             <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-5">
-              <Rocket className="w-8 h-8 text-[#2563EB]" />
+              <Rocket className="w-8 h-8 text-brand-500" />
             </div>
             <h2 className="text-xl font-bold text-[#111827] mb-2">
               Nous pr&eacute;parons notre premier stock
             </h2>
-            <p className="text-gray-500 mb-8 max-w-md mx-auto">
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">
               Soyez parmi les premiers &agrave; &ecirc;tre alert&eacute;. Inscrivez-vous pour recevoir une notification d&egrave;s qu&apos;un v&eacute;hicule est disponible.
             </p>
 
@@ -240,11 +240,11 @@ function CatalogueContent() {
                   type="email"
                   required
                   placeholder="votre@email.com"
-                  className="flex-1 h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                  className="flex-1 h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
                 <button
                   type="submit"
-                  className="h-11 px-5 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shrink-0"
+                  className="h-11 px-5 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shrink-0"
                 >
                   <Bell className="w-4 h-4" />
                   M&apos;alerter
@@ -275,11 +275,11 @@ function CatalogueContent() {
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-gray-400 text-lg">Aucun v&eacute;hicule ne correspond &agrave; vos crit&egrave;res.</p>
-            <button onClick={resetFilters} className="mt-4 text-[#2563EB] text-sm font-medium hover:underline">
+            <button onClick={resetFilters} className="mt-4 text-brand-500 text-sm font-medium hover:underline">
               R&eacute;initialiser les filtres
             </button>
             <div className="mt-6">
-              <Link href="/demande" className="inline-flex items-center gap-2 bg-[#2563EB] text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors">
+              <Link href="/demande" className="inline-flex items-center gap-2 bg-brand-500 text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-brand-600 transition-colors">
                 Faire une demande personnalis&eacute;e
               </Link>
             </div>

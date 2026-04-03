@@ -57,8 +57,8 @@ export default function ComparisonTable() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left text-sm font-medium text-gray-500 py-4 pr-4">Critère</th>
-                  <th className="text-left text-sm font-bold text-[#2563EB] py-4 px-4">DRAZONO</th>
+                  <th className="text-left text-sm font-medium text-gray-600 py-4 pr-4">Critère</th>
+                  <th className="text-left text-sm font-bold text-brand-500 py-4 px-4">DRAZONO</th>
                   <th className="text-left text-sm font-medium text-gray-400 py-4 pl-4">AutoScout24 / LaCentrale</th>
                 </tr>
               </thead>

@@ -28,7 +28,7 @@ export default function HeroSection() {
         style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1603386329225-868f9b1ee6c9?w=1920&q=80)' }}
       />
       {/* Overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0F172A]/90 via-[#0F172A]/80 to-[#0F172A]/70" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0A1325]/90 via-[#0A1325]/80 to-[#0A1325]/70" />
 
       {/* Grid pattern */}
       <div
@@ -113,12 +113,12 @@ export default function HeroSection() {
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Recherchez une marque, un modèle..."
-              className="w-full h-12 sm:h-14 pl-12 pr-4 rounded-l-full bg-white/95 backdrop-blur-sm text-[#111827] text-sm sm:text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2563EB] shadow-2xl"
+              className="w-full h-12 sm:h-14 pl-12 pr-4 rounded-l-full bg-white/95 backdrop-blur-sm text-[#111827] text-sm sm:text-base placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-2xl"
             />
           </div>
           <button
             type="submit"
-            className="btn-shimmer h-12 sm:h-14 px-6 sm:px-8 bg-[#2563EB] hover:bg-blue-600 text-white font-semibold text-sm rounded-r-full transition-colors shadow-2xl"
+            className="btn-shimmer h-12 sm:h-14 px-6 sm:px-8 bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm rounded-r-full transition-colors shadow-2xl"
           >
             Rechercher
           </button>
@@ -132,7 +132,7 @@ export default function HeroSection() {
         >
           <Link
             href="/catalogue"
-            className="btn-shimmer inline-flex items-center justify-center bg-white text-[#0F172A] px-8 py-3.5 rounded-full font-semibold text-sm hover:bg-gray-50 transition-colors shadow-lg"
+            className="btn-shimmer inline-flex items-center justify-center bg-white text-[#0A1325] px-8 py-3.5 rounded-full font-semibold text-sm hover:bg-gray-50 transition-colors shadow-lg"
           >
             Explorer le catalogue
           </Link>
@@ -147,7 +147,7 @@ export default function HeroSection() {
 
       {/* Stats bar */}
       <motion.div
-        className="relative z-10 border-t border-white/10 bg-[#0F172A]/40 backdrop-blur-sm"
+        className="relative z-10 border-t border-white/10 bg-[#0A1325]/40 backdrop-blur-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.7, delay: 0.65 }}
@@ -162,7 +162,7 @@ export default function HeroSection() {
             ].map((stat, i) => (
               <div key={i} className="py-6 px-4 text-center">
                 <div className="flex items-center justify-center gap-2">
-                  <stat.icon className="w-4 h-4 text-[#2563EB]" />
+                  <stat.icon className="w-4 h-4 text-brand-500" />
                   <p className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                     {stat.suffix === 'h' ? '<' : ''}<CountUp end={stat.value} duration={1500} />{stat.suffix}
                   </p>

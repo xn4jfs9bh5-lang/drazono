@@ -52,7 +52,7 @@ export default function DemandePage() {
     setSubmitting(false)
   }
 
-  const inputClass = 'w-full h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]'
+  const inputClass = 'w-full h-11 rounded-lg border border-gray-200 bg-white px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500'
 
   if (done) {
     const waMsg = `Bonjour, je viens de soumettre une demande personnalisée sur DRAZONO.\nNom: ${form.name}\nMarque: ${form.brand || 'Non précisée'}\nBudget: ${form.budget || 'Non précisé'}€\nPays: ${form.country || 'Non précisé'}`
@@ -64,7 +64,7 @@ export default function DemandePage() {
               <CheckCircle className="w-8 h-8 text-emerald-600" />
             </div>
             <h1 className="text-2xl font-bold text-[#111827] mb-3">Demande envoyée !</h1>
-            <p className="text-gray-500 mb-8">
+            <p className="text-gray-600 mb-8">
               Notre équipe va analyser votre demande et vous recontacter sous 24h.
               Pour accélérer le processus, contactez-nous directement sur WhatsApp.
             </p>
@@ -88,13 +88,13 @@ export default function DemandePage() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn>
           <div className="text-center mb-10">
-            <div className="w-14 h-14 bg-[#2563EB]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Search className="w-7 h-7 text-[#2563EB]" />
+            <div className="w-14 h-14 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Search className="w-7 h-7 text-brand-500" />
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight">
               Vous ne trouvez pas votre véhicule idéal ?
             </h1>
-            <p className="text-gray-500 mt-3 max-w-lg mx-auto">
+            <p className="text-gray-600 mt-3 max-w-lg mx-auto">
               Dites-nous ce que vous cherchez, on sourcera pour vous en Chine.
             </p>
           </div>
@@ -152,14 +152,14 @@ export default function DemandePage() {
                 value={form.message}
                 onChange={e => set('message', e.target.value)}
                 rows={3}
-                className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] resize-none"
+                className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
               />
             </div>
 
             <button
               type="submit"
               disabled={submitting}
-              className="w-full h-12 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-2"
+              className="w-full h-12 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-2"
             >
               {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
               Envoyer ma demande

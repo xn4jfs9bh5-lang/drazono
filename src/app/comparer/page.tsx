@@ -23,7 +23,7 @@ function VehicleSelector({ vehicles, selected, onChange }: {
       <select
         value={selected}
         onChange={e => onChange(e.target.value)}
-        className="w-full h-11 rounded-lg border border-gray-200 bg-white px-4 pr-10 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+        className="w-full h-11 rounded-lg border border-gray-200 bg-white px-4 pr-10 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-brand-500"
       >
         <option value="">Choisir un véhicule</option>
         {vehicles.map(v => (
@@ -60,7 +60,7 @@ function VehiclePreview({ vehicle }: { vehicle: Vehicle | undefined }) {
       <h3 className="font-semibold text-[#111827] text-center">
         {vehicle.brand} {vehicle.model} {vehicle.year}
       </h3>
-      <p className="text-center text-xl font-bold text-[#2563EB]">{fmt(vehicle.price_eur)} €</p>
+      <p className="text-center text-xl font-bold text-brand-500">{fmt(vehicle.price_eur)} €</p>
     </div>
   )
 }
@@ -108,13 +108,13 @@ export default function ComparerPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn>
           <div className="text-center mb-10">
-            <div className="w-14 h-14 bg-[#2563EB]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <ArrowLeftRight className="w-7 h-7 text-[#2563EB]" />
+            <div className="w-14 h-14 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <ArrowLeftRight className="w-7 h-7 text-brand-500" />
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight">
               Comparer des véhicules
             </h1>
-            <p className="text-gray-500 mt-2">
+            <p className="text-gray-600 mt-2">
               Sélectionnez 2 véhicules pour les comparer côte à côte
             </p>
           </div>
@@ -139,7 +139,7 @@ export default function ComparerPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50">
-                    <th className="text-left py-3 px-4 text-gray-500 font-medium w-1/3">Caractéristique</th>
+                    <th className="text-left py-3 px-4 text-gray-600 font-medium w-1/3">Caractéristique</th>
                     <th className="text-center py-3 px-4 text-[#111827] font-semibold">{vehicleA.brand} {vehicleA.model}</th>
                     <th className="text-center py-3 px-4 text-[#111827] font-semibold">{vehicleB.brand} {vehicleB.model}</th>
                   </tr>
@@ -147,7 +147,7 @@ export default function ComparerPage() {
                 <tbody>
                   {SPECS.map((spec, i) => (
                     <tr key={spec.key} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
-                      <td className="py-3 px-4 text-gray-500">{spec.label}</td>
+                      <td className="py-3 px-4 text-gray-600">{spec.label}</td>
                       <td className="py-3 px-4 text-center text-[#111827] font-medium">{getSpecValue(vehicleA, spec.key)}</td>
                       <td className="py-3 px-4 text-center text-[#111827] font-medium">{getSpecValue(vehicleB, spec.key)}</td>
                     </tr>

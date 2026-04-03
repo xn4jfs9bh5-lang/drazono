@@ -4,7 +4,7 @@ import { Shield, CheckCircle, Ship, Zap, Flag } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const items = [
-  { icon: Shield, label: 'Acompte remboursable à 100%', color: 'text-[#2563EB] bg-blue-50' },
+  { icon: Shield, label: 'Acompte remboursable à 100%', color: 'text-brand-500 bg-blue-50' },
   { icon: CheckCircle, label: 'Photos confirmées par le vendeur', color: 'text-emerald-600 bg-emerald-50' },
   { icon: Ship, label: 'Livraison dans 30+ pays', color: 'text-indigo-600 bg-indigo-50' },
   { icon: Zap, label: 'Réponse garantie en moins de 2h', color: 'text-amber-600 bg-amber-50' },

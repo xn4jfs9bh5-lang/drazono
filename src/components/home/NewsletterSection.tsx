@@ -38,11 +38,11 @@ export default function NewsletterSection() {
   }
 
   return (
-    <section className="py-16 bg-[#0F172A]">
+    <section className="py-16 bg-[#0A1325]">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <FadeIn>
           <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Bell className="w-6 h-6 text-[#2563EB]" />
+            <Bell className="w-6 h-6 text-brand-500" />
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
             Ne ratez aucune nouvelle arrivée
@@ -63,19 +63,19 @@ export default function NewsletterSection() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="Votre adresse email"
-                className="flex-1 h-12 rounded-l-full bg-white/10 border border-white/20 text-white placeholder:text-gray-500 px-5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                className="flex-1 h-12 rounded-l-full bg-white/10 border border-white/20 text-white placeholder:text-gray-600 px-5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="h-12 px-6 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 text-white rounded-r-full font-medium text-sm transition-colors"
+                className="h-12 px-6 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white rounded-r-full font-medium text-sm transition-colors"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Je m\'abonne'}
               </button>
             </form>
           )}
 
-          <p className="text-xs text-gray-500 mt-4">
+          <p className="text-xs text-gray-600 mt-4">
             Soyez parmi les premiers informés
           </p>
         </FadeIn>

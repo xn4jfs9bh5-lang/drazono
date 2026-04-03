@@ -35,7 +35,7 @@ export default function SavingsSection() {
             <h2 className="text-2xl sm:text-3xl font-bold text-[#111827] tracking-tight">
               Combien pouvez-vous économiser ?
             </h2>
-            <p className="text-gray-500 mt-3 max-w-xl mx-auto">
+            <p className="text-gray-600 mt-3 max-w-xl mx-auto">
               Comparez les prix européens avec les prix DRAZONO, direct usine Chine.
             </p>
           </div>
@@ -46,10 +46,10 @@ export default function SavingsSection() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-4 text-gray-500 font-medium">Modèle</th>
-                  <th className="text-right py-4 text-gray-500 font-medium">Prix Europe</th>
-                  <th className="text-right py-4 text-gray-500 font-medium">Prix DRAZONO</th>
-                  <th className="text-right py-4 text-gray-500 font-medium">Économie</th>
+                  <th className="text-left py-4 text-gray-600 font-medium">Modèle</th>
+                  <th className="text-right py-4 text-gray-600 font-medium">Prix Europe</th>
+                  <th className="text-right py-4 text-gray-600 font-medium">Prix DRAZONO</th>
+                  <th className="text-right py-4 text-gray-600 font-medium">Économie</th>
                 </tr>
               </thead>
               <tbody>
@@ -57,7 +57,7 @@ export default function SavingsSection() {
                   <tr key={i} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
                     <td className="py-4 font-medium text-[#111827]">{row.model}</td>
                     <td className="py-4 text-right text-gray-400 line-through">{formatPrice(row.europe)} &euro;</td>
-                    <td className="py-4 text-right font-bold text-[#2563EB]">{formatPrice(row.drazono)} &euro;</td>
+                    <td className="py-4 text-right font-bold text-brand-500">{formatPrice(row.drazono)} &euro;</td>
                     <td className="py-4 text-right">
                       <AnimatedPercent value={row.percent} />
                     </td>

@@ -103,7 +103,7 @@ export default function EspaceClientPage() {
             </h1>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 text-sm text-gray-500 hover:text-red-500 transition-colors"
+              className="flex items-center gap-2 text-sm text-gray-600 hover:text-red-500 transition-colors"
             >
               <LogOut className="w-4 h-4" />
               Déconnexion
@@ -120,7 +120,7 @@ export default function EspaceClientPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm transition-colors ${
                     activeTab === tab.id
-                      ? 'bg-[#2563EB]/10 text-[#2563EB] font-medium'
+                      ? 'bg-brand-500/10 text-brand-500 font-medium'
                       : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
@@ -145,7 +145,7 @@ export default function EspaceClientPage() {
                         maxLength={100}
                         value={profile.name}
                         onChange={e => setProfile({ ...profile, name: e.target.value })}
-                        className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                        className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                       />
                     </div>
                     <div>
@@ -153,7 +153,7 @@ export default function EspaceClientPage() {
                       <input
                         type="email"
                         value={profile.email}
-                        className="w-full h-10 rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm"
+                        className="w-full h-12 rounded-xl border border-gray-300 bg-gray-50 px-4 text-base"
                         disabled
                       />
                     </div>
@@ -164,7 +164,7 @@ export default function EspaceClientPage() {
                         maxLength={20}
                         value={profile.phone}
                         onChange={e => setProfile({ ...profile, phone: e.target.value })}
-                        className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                        className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                       />
                     </div>
                     <div>
@@ -174,7 +174,7 @@ export default function EspaceClientPage() {
                         maxLength={50}
                         value={profile.country}
                         onChange={e => setProfile({ ...profile, country: e.target.value })}
-                        className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                        className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                       />
                     </div>
                     <div>
@@ -184,7 +184,7 @@ export default function EspaceClientPage() {
                         maxLength={50}
                         value={profile.city}
                         onChange={e => setProfile({ ...profile, city: e.target.value })}
-                        className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                        className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                       />
                     </div>
                     {saveMsg && (
@@ -195,7 +195,7 @@ export default function EspaceClientPage() {
                     <button
                       type="submit"
                       disabled={saving}
-                      className="h-10 px-6 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
+                      className="h-10 px-6 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
                     >
                       {saving ? 'Enregistrement...' : 'Enregistrer'}
                     </button>
@@ -217,34 +217,34 @@ export default function EspaceClientPage() {
               {activeTab === 'alerts' && (
                 <div>
                   <h2 className="text-lg font-bold text-[#111827] mb-6">Mes alertes</h2>
-                  <p className="text-sm text-gray-500 mb-6">Configurez une alerte pour être notifié quand un véhicule correspondant est ajouté.</p>
+                  <p className="text-sm text-gray-600 mb-6">Configurez une alerte pour être notifié quand un véhicule correspondant est ajouté.</p>
                   <form className="space-y-4 max-w-md">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Marque</label>
-                      <select className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]">
+                      <select className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500">
                         <option value="">Toutes les marques</option>
                         {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
                       </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Budget max (&#8364;)</label>
-                      <input type="number" className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]" placeholder="ex: 15000" />
+                      <input type="number" className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500" placeholder="ex: 15000" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                      <select className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]">
+                      <select className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500">
                         <option value="">Tous les types</option>
                         {BODY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                       </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Carburant</label>
-                      <select className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]">
+                      <select className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500">
                         <option value="">Tous</option>
                         {FUEL_TYPES.map(f => <option key={f} value={f}>{f}</option>)}
                       </select>
                     </div>
-                    <button type="button" className="h-10 px-6 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors">
+                    <button type="button" className="h-10 px-6 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium text-sm transition-colors">
                       Créer l&apos;alerte
                     </button>
                   </form>

@@ -155,8 +155,8 @@ export default function VehiclePage() {
       <div className="pt-28 pb-20 text-center">
         <Car className="w-16 h-16 text-gray-200 mx-auto mb-4" />
         <h1 className="text-2xl font-bold text-[#111827] mb-2">Véhicule introuvable</h1>
-        <p className="text-gray-500 mb-6">Ce véhicule a peut-être été vendu ou retiré.</p>
-        <Link href="/catalogue" className="inline-flex items-center gap-2 bg-[#2563EB] text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors">
+        <p className="text-gray-600 mb-6">Ce véhicule a peut-être été vendu ou retiré.</p>
+        <Link href="/catalogue" className="inline-flex items-center gap-2 bg-brand-500 text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-brand-600 transition-colors">
           Voir le catalogue
         </Link>
       </div>
@@ -169,7 +169,7 @@ export default function VehiclePage() {
 
   const waBase = `https://wa.me/${WHATSAPP_NUMBER}?text=`
   const waMessages = [
-    { label: 'Je veux plus de détails', icon: MessageCircle, style: 'bg-[#25D366] hover:bg-[#20BD5A] text-white',
+    { label: 'Je veux plus de détails', icon: MessageCircle, style: 'bg-[#25D366] hover:bg-[#20BA5C] text-white font-bold text-base',
       msg: `Bonjour, je suis intéressé par le ${vehicle.brand} ${vehicle.model} ${vehicle.year} à ${fmt(vehicle.price_eur)}€ sur DRAZONO. Pouvez-vous me donner plus de détails ?` },
     { label: 'Devis transport + douane', icon: Ship, style: 'border border-[#25D366] text-[#25D366] hover:bg-[#25D366]/5',
       msg: `Bonjour, je souhaite un devis de transport et douane pour le ${vehicle.brand} ${vehicle.model} ${vehicle.year}. Merci !` },
@@ -211,9 +211,9 @@ export default function VehiclePage() {
         {/* Breadcrumb */}
         <FadeIn>
           <nav className="flex items-center gap-1.5 text-sm text-gray-400 mb-6">
-            <Link href="/" className="hover:text-[#2563EB] transition-colors"><Home className="w-3.5 h-3.5" /></Link>
+            <Link href="/" className="hover:text-brand-500 transition-colors"><Home className="w-3.5 h-3.5" /></Link>
             <ChevronRight className="w-3 h-3" />
-            <Link href="/catalogue" className="hover:text-[#2563EB] transition-colors">Catalogue</Link>
+            <Link href="/catalogue" className="hover:text-brand-500 transition-colors">Catalogue</Link>
             <ChevronRight className="w-3 h-3" />
             <span className="text-[#111827] font-medium truncate">{vehicle.brand} {vehicle.model} {vehicle.year}</span>
           </nav>
@@ -299,7 +299,7 @@ export default function VehiclePage() {
               {images.length > 1 && (
                 <div className="flex gap-2 mt-3 overflow-x-auto no-scrollbar pb-1">
                   {images.map((img, i) => (
-                    <button key={i} onClick={() => setActiveImage(i)} className={`relative shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-all ${activeImage === i ? 'border-[#2563EB] shadow-md' : 'border-transparent opacity-70 hover:opacity-100'}`}>
+                    <button key={i} onClick={() => setActiveImage(i)} className={`relative shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-all ${activeImage === i ? 'border-brand-500 shadow-md' : 'border-transparent opacity-70 hover:opacity-100'}`}>
                       <Image src={img} alt="" fill className="object-cover" sizes="80px" unoptimized />
                     </button>
                   ))}
@@ -323,10 +323,10 @@ export default function VehiclePage() {
 
               {/* Price */}
               <div className="mt-4">
-                <p className="text-3xl sm:text-4xl font-bold text-[#2563EB] tracking-tight">
+                <p className="text-3xl sm:text-4xl font-bold text-brand-500 tracking-tight">
                   {fmt(vehicle.price_eur)} &euro;
                 </p>
-                <p className="text-base text-gray-500 mt-0.5">
+                <p className="text-base text-gray-600 mt-0.5">
                   ≈ {fmt(vehicle.price_fcfa || vehicle.price_eur * EUR_TO_FCFA)} FCFA
                 </p>
               </div>
@@ -340,13 +340,21 @@ export default function VehiclePage() {
 
               {/* WhatsApp CTAs */}
               <div className="mt-5 space-y-2.5">
-                {waMessages.map((wa, i) => (
-                  <a key={i} href={`${waBase}${encodeURIComponent(wa.msg)}`} target="_blank" rel="noopener noreferrer"
-                    className={`flex items-center gap-3 w-full p-3.5 rounded-xl transition-colors text-sm font-medium ${wa.style}`}>
-                    <wa.icon className="w-5 h-5 shrink-0" />
-                    {wa.label}
-                  </a>
-                ))}
+                <a href={`${waBase}${encodeURIComponent(waMessages[0].msg)}`} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full h-14 bg-[#25D366] hover:bg-[#20BA5C] text-white font-bold text-base rounded-2xl shadow-lg hover:shadow-xl active:scale-[0.98] transition-all">
+                  <MessageCircle className="w-5 h-5 shrink-0" />
+                  {waMessages[0].label}
+                </a>
+                <a href={`${waBase}${encodeURIComponent(waMessages[1].msg)}`} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full h-12 border-2 border-[#25D366] text-[#25D366] font-semibold text-sm rounded-2xl hover:bg-[#25D366]/5 transition-all">
+                  <Ship className="w-5 h-5 shrink-0" />
+                  {waMessages[1].label}
+                </a>
+                <a href={`${waBase}${encodeURIComponent(waMessages[2].msg)}`} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full h-11 text-[#25D366] font-medium text-sm underline underline-offset-2 hover:text-[#20BA5C] transition-colors">
+                  <HelpCircle className="w-4 h-4 shrink-0" />
+                  {waMessages[2].label}
+                </a>
               </div>
 
               {/* Share actions */}
@@ -447,7 +455,7 @@ export default function VehiclePage() {
               <div className="mb-5">
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Pays de destination</label>
                 <div className="relative">
-                  <select value={countryIdx} onChange={e => setCountryIdx(Number(e.target.value))} className="w-full sm:w-72 h-11 rounded-lg border border-gray-200 px-4 pr-10 text-sm bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-[#2563EB]">
+                  <select value={countryIdx} onChange={e => setCountryIdx(Number(e.target.value))} className="w-full sm:w-72 h-11 rounded-lg border border-gray-200 px-4 pr-10 text-sm bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-brand-500">
                     {COUNTRIES.map((c, i) => <option key={i} value={i}>{c.name}</option>)}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -455,19 +463,19 @@ export default function VehiclePage() {
               </div>
 
               <div className="space-y-2.5 text-sm">
-                <div className="flex justify-between"><span className="text-gray-500">Prix véhicule</span><span className="font-medium text-[#111827]">{fmt(vehicle.price_eur)} &euro;</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Transport estimé ({country.region === 'west-africa' ? 'Afrique' : country.region === 'europe' ? 'Europe' : 'Canada'})</span><span className="font-medium text-[#111827]">{fmt(dutyCalc.transport)} &euro;</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Assurance transport (~2%)</span><span className="font-medium text-[#111827]">{fmt(dutyCalc.insurance)} &euro;</span></div>
+                <div className="flex justify-between"><span className="text-gray-600">Prix véhicule</span><span className="font-medium text-[#111827]">{fmt(vehicle.price_eur)} &euro;</span></div>
+                <div className="flex justify-between"><span className="text-gray-600">Transport estimé ({country.region === 'west-africa' ? 'Afrique' : country.region === 'europe' ? 'Europe' : 'Canada'})</span><span className="font-medium text-[#111827]">{fmt(dutyCalc.transport)} &euro;</span></div>
+                <div className="flex justify-between"><span className="text-gray-600">Assurance transport (~2%)</span><span className="font-medium text-[#111827]">{fmt(dutyCalc.insurance)} &euro;</span></div>
                 <div className="border-t border-gray-100 pt-2.5" />
-                <div className="flex justify-between"><span className="text-gray-500">Droits de douane ({Math.round(country.dutyRate * 100)}%)</span><span className="font-medium text-[#111827]">{fmt(dutyCalc.duty)} &euro;</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">TVA ({Math.round(country.vatRate * 100)}%)</span><span className="font-medium text-[#111827]">{fmt(dutyCalc.vat)} &euro;</span></div>
-                {country.otherRate > 0 && <div className="flex justify-between"><span className="text-gray-500">Autres taxes ({(country.otherRate * 100).toFixed(1)}%)</span><span className="font-medium text-[#111827]">{fmt(dutyCalc.other)} &euro;</span></div>}
+                <div className="flex justify-between"><span className="text-gray-600">Droits de douane ({Math.round(country.dutyRate * 100)}%)</span><span className="font-medium text-[#111827]">{fmt(dutyCalc.duty)} &euro;</span></div>
+                <div className="flex justify-between"><span className="text-gray-600">TVA ({Math.round(country.vatRate * 100)}%)</span><span className="font-medium text-[#111827]">{fmt(dutyCalc.vat)} &euro;</span></div>
+                {country.otherRate > 0 && <div className="flex justify-between"><span className="text-gray-600">Autres taxes ({(country.otherRate * 100).toFixed(1)}%)</span><span className="font-medium text-[#111827]">{fmt(dutyCalc.other)} &euro;</span></div>}
                 <div className="border-t border-gray-200 pt-3 mt-1" />
                 <div className="flex justify-between items-end">
                   <span className="font-semibold text-[#111827] text-base">Total estimé</span>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-[#2563EB]">{fmt(dutyCalc.total)} &euro;</p>
-                    {country.isFcfa && <p className="text-sm text-gray-500">≈ {fmt(dutyCalc.total * EUR_TO_FCFA)} FCFA</p>}
+                    <p className="text-2xl font-bold text-brand-500">{fmt(dutyCalc.total)} &euro;</p>
+                    {country.isFcfa && <p className="text-sm text-gray-600">≈ {fmt(dutyCalc.total * EUR_TO_FCFA)} FCFA</p>}
                   </div>
                 </div>
               </div>
@@ -502,7 +510,7 @@ export default function VehiclePage() {
                   </div>
                   <div>
                     <p className="font-semibold text-[#111827] text-sm">{item.title}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
+                    <p className="text-xs text-gray-600 mt-0.5">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -518,10 +526,10 @@ export default function VehiclePage() {
               {['Contact', 'Vérification', 'Acompte', 'Commande', 'Livraison'].map((step, i) => (
                 <div key={i} className="flex items-center shrink-0">
                   <div className="flex flex-col items-center">
-                    <div className="w-9 h-9 rounded-full bg-[#2563EB] text-white flex items-center justify-center text-sm font-bold">{i + 1}</div>
+                    <div className="w-9 h-9 rounded-full bg-brand-500 text-white flex items-center justify-center text-sm font-bold">{i + 1}</div>
                     <span className="text-xs text-gray-600 mt-1.5 font-medium whitespace-nowrap">{step}</span>
                   </div>
-                  {i < 4 && <div className="w-8 sm:w-14 h-px bg-[#2563EB]/30 mx-1 sm:mx-2 mt-[-18px]" />}
+                  {i < 4 && <div className="w-8 sm:w-14 h-px bg-brand-500/30 mx-1 sm:mx-2 mt-[-18px]" />}
                 </div>
               ))}
             </div>
@@ -561,16 +569,16 @@ export default function VehiclePage() {
       <AnimatePresence>
         {showSticky && vehicle.status === 'disponible' && (
           <motion.div initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-4 py-3 lg:hidden">
-            <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto">
-              <div>
-                <p className="text-lg font-bold text-[#2563EB]">{fmt(vehicle.price_eur)} &euro;</p>
-                <p className="text-xs text-gray-500">{vehicle.brand} {vehicle.model}</p>
-              </div>
+            className="fixed inset-x-0 bottom-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-100 p-4 md:hidden"
+            style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
+            <div className="flex gap-3 max-w-7xl mx-auto">
               <a href={`${waBase}${encodeURIComponent(waMessages[0].msg)}`} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-[#25D366] hover:bg-[#20BD5A] text-white px-5 py-2.5 rounded-full text-sm font-medium transition-colors shrink-0">
-                <MessageCircle className="w-4 h-4" /> Contacter
+                className="flex items-center justify-center gap-2 flex-1 h-12 bg-[#25D366] hover:bg-[#20BA5C] text-white rounded-2xl text-sm font-bold transition-colors">
+                <MessageCircle className="w-5 h-5" /> Contacter
               </a>
+              <button className="flex items-center justify-center w-12 h-12 border border-gray-200 rounded-2xl text-gray-600 hover:bg-gray-50 transition-colors" aria-label="Ajouter aux favoris">
+                <Heart className="w-5 h-5" />
+              </button>
             </div>
           </motion.div>
         )}

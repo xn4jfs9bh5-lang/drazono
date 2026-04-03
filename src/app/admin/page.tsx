@@ -489,7 +489,7 @@ export default function AdminPage() {
   // UI
   // -------------------------------------------------------------------------
 
-  const inputClass = 'w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] transition-colors'
+  const inputClass = 'w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1845CC] transition-colors'
   const labelClass = 'block text-sm font-medium text-gray-700 mb-1'
 
   return (
@@ -523,7 +523,7 @@ export default function AdminPage() {
                 onClick={() => { setActiveTab(tab.id); if (tab.id === 'add-vehicle' && activeTab !== 'add-vehicle') { setEditingId(null); setForm(EMPTY_FORM); setPhotos([]); setPhotoPreviews([]); setExistingImages([]) } }}
                 className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm transition-colors ${
                   activeTab === tab.id || (tab.id === 'add-vehicle' && activeTab === 'edit-vehicle')
-                    ? 'bg-[#0F172A] text-white font-medium'
+                    ? 'bg-[#0A1325] text-white font-medium'
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
@@ -599,7 +599,7 @@ export default function AdminPage() {
                   <h3 className="font-semibold text-[#111827]">Gestion des vehicules</h3>
                   <button
                     onClick={() => { setEditingId(null); setForm(EMPTY_FORM); setPhotos([]); setPhotoPreviews([]); setExistingImages([]); setActiveTab('add-vehicle') }}
-                    className="flex items-center gap-2 h-9 px-4 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                    className="flex items-center gap-2 h-9 px-4 bg-[#1845CC] hover:bg-brand-600 text-white rounded-lg text-sm font-medium transition-colors"
                   >
                     <Plus className="w-4 h-4" /> Ajouter
                   </button>
@@ -614,7 +614,7 @@ export default function AdminPage() {
                       placeholder="Rechercher un vehicule..."
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
-                      className="w-full h-9 pl-9 pr-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                      className="w-full h-9 pl-9 pr-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1845CC]"
                     />
                     {searchQuery && (
                       <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -627,7 +627,7 @@ export default function AdminPage() {
                     <select
                       value={statusFilter}
                       onChange={e => setStatusFilter(e.target.value)}
-                      className="h-9 pl-9 pr-8 rounded-lg border border-gray-200 text-sm appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                      className="h-9 pl-9 pr-8 rounded-lg border border-gray-200 text-sm appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-[#1845CC]"
                     >
                       <option value="all">Tous les statuts</option>
                       {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -697,7 +697,7 @@ export default function AdminPage() {
                             </td>
                             <td className="py-3 text-gray-500">{v.views_count}</td>
                             <td className="py-3 text-right space-x-2">
-                              <button onClick={() => startEdit(v)} className="text-xs text-[#2563EB] hover:underline">Modifier</button>
+                              <button onClick={() => startEdit(v)} className="text-xs text-[#1845CC] hover:underline">Modifier</button>
                               <button onClick={() => setSocialVehicle(v)} className="text-xs text-violet-600 hover:underline">Social</button>
                               <button onClick={() => setDeleteTarget(v.id)} className="text-xs text-red-500 hover:underline">Supprimer</button>
                             </td>
@@ -820,7 +820,7 @@ export default function AdminPage() {
                       rows={4}
                       value={form.description}
                       onChange={e => setForm(f => ({ ...f, description: e.target.value.slice(0, 1000) }))}
-                      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] resize-none transition-colors"
+                      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1845CC] resize-none transition-colors"
                     />
                   </div>
 
@@ -888,11 +888,11 @@ export default function AdminPage() {
                       onDrop={onDrop}
                       onClick={() => fileInputRef.current?.click()}
                       className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
-                        isDragging ? 'border-[#2563EB] bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                        isDragging ? 'border-[#1845CC] bg-blue-50' : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
                       <Upload className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                      <p className="text-sm text-gray-500">Glissez vos photos ici ou <span className="text-[#2563EB] font-medium">cliquez pour parcourir</span></p>
+                      <p className="text-sm text-gray-500">Glissez vos photos ici ou <span className="text-[#1845CC] font-medium">cliquez pour parcourir</span></p>
                       <p className="text-xs text-gray-400 mt-1">PNG, JPG, WEBP &mdash; max 10MB par fichier</p>
                       <input
                         ref={fileInputRef}
@@ -922,7 +922,7 @@ export default function AdminPage() {
                       type="button"
                       onClick={handleSubmitVehicle}
                       disabled={submitting}
-                      className="flex items-center gap-2 h-10 px-6 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-medium text-sm transition-colors"
+                      className="flex items-center gap-2 h-10 px-6 bg-[#1845CC] hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-medium text-sm transition-colors"
                     >
                       {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                       {editingId ? 'Mettre a jour' : form.status === 'disponible' ? 'Publier' : 'Enregistrer'}

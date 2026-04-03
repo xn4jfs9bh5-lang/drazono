@@ -51,7 +51,7 @@ export default function TarifsPage() {
             <h1 className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight mb-4">
               Tarifs et services
             </h1>
-            <p className="text-gray-500 max-w-xl mx-auto">
+            <p className="text-gray-600 max-w-xl mx-auto">
               Transparence totale sur nos services et notre commission.
             </p>
           </div>
@@ -59,7 +59,7 @@ export default function TarifsPage() {
 
         {/* Commission explanation */}
         <FadeIn delay={0.1}>
-          <div className="bg-[#2563EB]/5 border border-[#2563EB]/10 rounded-2xl p-6 sm:p-8 mb-12 text-center">
+          <div className="bg-brand-500/5 border border-brand-500/10 rounded-2xl p-6 sm:p-8 mb-12 text-center">
             <h2 className="text-xl font-bold text-[#111827] mb-2">Notre commission</h2>
             <p className="text-gray-600 leading-relaxed">
               DRAZONO prend une commission de service <strong>incluse dans le prix affiché</strong>.
@@ -99,7 +99,7 @@ export default function TarifsPage() {
               </h3>
               <ul className="space-y-3">
                 {notIncluded.map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-gray-500">
+                  <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
                     <X className="w-4 h-4 text-gray-300 mt-0.5 shrink-0" />
                     {item}
                   </li>
@@ -120,11 +120,11 @@ export default function TarifsPage() {
           {optionalServices.map((service, i) => (
             <FadeIn key={i} delay={0.3 + i * 0.08}>
               <div className="bg-[#FAFAFA] rounded-2xl border border-gray-100 p-6 text-center">
-                <div className="w-12 h-12 bg-[#2563EB]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <service.icon className="w-6 h-6 text-[#2563EB]" />
+                <div className="w-12 h-12 bg-brand-500/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <service.icon className="w-6 h-6 text-brand-500" />
                 </div>
                 <h3 className="font-semibold text-[#111827] mb-2">{service.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{service.description}</p>
+                <p className="text-sm text-gray-600 leading-relaxed">{service.description}</p>
               </div>
             </FadeIn>
           ))}
@@ -132,7 +132,7 @@ export default function TarifsPage() {
 
         {/* Section B2B */}
         <FadeIn delay={0.4}>
-          <div className="bg-[#0F172A] rounded-2xl p-8 sm:p-10 text-center">
+          <div className="bg-[#0A1325] rounded-2xl p-8 sm:p-10 text-center">
             <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-5">
               <Users className="w-7 h-7 text-white" />
             </div>
@@ -145,17 +145,17 @@ export default function TarifsPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 max-w-2xl mx-auto">
               <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                <Package className="w-5 h-5 text-[#2563EB] mx-auto mb-2" />
+                <Package className="w-5 h-5 text-brand-500 mx-auto mb-2" />
                 <p className="text-sm text-white font-medium">Commande groupée</p>
                 <p className="text-xs text-gray-400 mt-1">À partir de 3 véhicules</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                <FileCheck className="w-5 h-5 text-[#2563EB] mx-auto mb-2" />
+                <FileCheck className="w-5 h-5 text-brand-500 mx-auto mb-2" />
                 <p className="text-sm text-white font-medium">Devis personnalisé B2B</p>
                 <p className="text-xs text-gray-400 mt-1">Adapté à vos besoins</p>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                <Check className="w-5 h-5 text-[#2563EB] mx-auto mb-2" />
+                <Check className="w-5 h-5 text-brand-500 mx-auto mb-2" />
                 <p className="text-sm text-white font-medium">Conditions négociables</p>
                 <p className="text-xs text-gray-400 mt-1">Tarifs dégressifs sur volume</p>
               </div>

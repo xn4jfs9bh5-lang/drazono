@@ -45,6 +45,20 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        brand: {
+          50: '#EFF6FF',
+          100: '#DBEAFE',
+          500: '#1845CC',
+          600: '#1538B0',
+          700: '#0F2A8A',
+          900: '#0B1220',
+        },
+        drazono: {
+          navy: '#0A1325',
+          gold: '#D4A017',
+          red: '#C0392B',
+          slate: '#F8FAFC',
+        },
       },
       keyframes: {
         "accordion-down": {

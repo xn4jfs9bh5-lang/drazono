@@ -78,8 +78,8 @@ export async function POST(req: Request) {
 <tr><td align="center">
 <table width="100%" style="max-width:560px;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0">
 
-<tr><td style="background:#0F172A;padding:20px 24px;text-align:center">
-<span style="color:#2563EB;font-weight:800;font-size:22px">D</span><span style="color:#fff;font-weight:800;font-size:22px">RAZONO</span>
+<tr><td style="background:#0A1325;padding:20px 24px;text-align:center">
+<span style="color:#1845CC;font-weight:800;font-size:22px">D</span><span style="color:#fff;font-weight:800;font-size:22px">RAZONO</span>
 </td></tr>
 
 ${imageUrl ? `<tr><td><img src="${imageUrl}" alt="${vehicle.brand} ${vehicle.model}" style="width:100%;display:block;max-height:300px;object-fit:cover" /></td></tr>` : ''}
@@ -87,12 +87,12 @@ ${imageUrl ? `<tr><td><img src="${imageUrl}" alt="${vehicle.brand} ${vehicle.mod
 <tr><td style="padding:24px">
 <div style="display:inline-block;background:#fee2e2;color:#b91c1c;font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;margin-bottom:12px">Direct Chine</div>
 <h1 style="margin:8px 0 4px;font-size:22px;color:#111827">${vehicle.brand} ${vehicle.model} ${vehicle.year}</h1>
-<p style="margin:0;font-size:28px;font-weight:800;color:#2563EB">${fmt(vehicle.price_eur)} €</p>
+<p style="margin:0;font-size:28px;font-weight:800;color:#1845CC">${fmt(vehicle.price_eur)} €</p>
 <p style="margin:4px 0 0;font-size:14px;color:#6b7280">≈ ${fmt(vehicle.price_fcfa || vehicle.price_eur * 656)} FCFA</p>
 
 <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px">
 <tr>
-<td style="padding:4px 0"><a href="${vehicleUrl}" style="display:block;text-align:center;background:#2563EB;color:#fff;padding:14px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px">Voir ce véhicule</a></td>
+<td style="padding:4px 0"><a href="${vehicleUrl}" style="display:block;text-align:center;background:#1845CC;color:#fff;padding:14px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px">Voir ce véhicule</a></td>
 </tr>
 <tr>
 <td style="padding:4px 0"><a href="https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}" style="display:block;text-align:center;background:#25D366;color:#fff;padding:14px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px">Je suis intéressé — WhatsApp</a></td>

@@ -3,21 +3,21 @@ import { CONTACT_EMAIL, WHATSAPP_NUMBER } from '@/lib/constants'
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0F172A] text-gray-400 pt-0 pb-8">
+    <footer className="bg-[#0A1325] text-gray-400 pt-0 pb-8">
       {/* Gradient separator */}
-      <div className="h-px w-full" style={{ background: 'linear-gradient(90deg, transparent, #2563EB, #7C3AED, transparent)' }} />
+      <div className="h-px w-full" style={{ background: 'linear-gradient(90deg, transparent, #1845CC, #7C3AED, transparent)' }} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           {/* Brand */}
           <div>
-            <h3 className="text-white font-bold text-2xl mb-3 tracking-tight"><span className="text-[#2563EB]">D</span>RAZONO</h3>
+            <h3 className="text-white font-bold text-2xl mb-3 tracking-tight"><span className="text-brand-500">D</span>RAZONO</h3>
             <p className="text-sm leading-relaxed mb-4">
               Import direct de véhicules chinois. Prix réel vendeur, livraison mondiale en option.
             </p>
             {/* Social icons */}
             <div className="flex items-center gap-3">
               {/* TikTok */}
-              <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-white/10 hover:bg-white rounded-full flex items-center justify-center transition-all hover:text-[#0F172A]" aria-label="TikTok">
+              <a href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-white/10 hover:bg-white rounded-full flex items-center justify-center transition-all hover:text-[#0A1325]" aria-label="TikTok">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V8.88a8.28 8.28 0 003.76.9V6.69z" /></svg>
               </a>
               {/* Facebook */}

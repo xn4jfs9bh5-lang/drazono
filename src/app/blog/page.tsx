@@ -25,7 +25,7 @@ export default function BlogPage() {
             <h1 className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight mb-4">
               Blog & Guides
             </h1>
-            <p className="text-gray-500 max-w-xl mx-auto">
+            <p className="text-gray-600 max-w-xl mx-auto">
               Guides, comparatifs et conseils pour acheter votre véhicule chinois.
             </p>
           </div>
@@ -35,15 +35,15 @@ export default function BlogPage() {
           {posts.map((post, i) => (
             <FadeIn key={post.id} delay={i * 0.08}>
               <Link href={`/blog/${post.slug}`} className="block group">
-                <article className="flex flex-col sm:flex-row gap-6 p-4 sm:p-6 rounded-2xl border border-gray-100 hover:border-[#2563EB]/20 hover:shadow-md transition-all bg-white">
+                <article className="flex flex-col sm:flex-row gap-6 p-4 sm:p-6 rounded-2xl border border-gray-100 hover:border-brand-500/20 hover:shadow-md transition-all bg-white">
                   <div className="w-full sm:w-48 h-32 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl shrink-0 flex items-center justify-center">
                     <span className="text-xs text-gray-400">Image</span>
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-lg font-semibold text-[#111827] group-hover:text-[#2563EB] transition-colors mb-2">
+                    <h2 className="text-lg font-semibold text-[#111827] group-hover:text-brand-500 transition-colors mb-2">
                       {post.title}
                     </h2>
-                    <p className="text-sm text-gray-500 line-clamp-2 mb-3">
+                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
                       {post.content.replace(/[#*]/g, '').slice(0, 150)}...
                     </p>
                     <div className="flex items-center gap-4 text-xs text-gray-400">

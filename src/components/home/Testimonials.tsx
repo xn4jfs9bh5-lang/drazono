@@ -7,21 +7,21 @@ import Image from 'next/image'
 const testimonials = [
   {
     name: 'Moussa D.',
-    country: 'Burkina Faso',
-    date: 'Mars 2026',
+    city: 'Ouagadougou',
+    date: 'Février 2026',
     vehicle: 'A acheté un BYD Atto 3',
     text: 'J\'ai trouvé mon BYD Atto 3 sur DRAZONO à un prix imbattable. Le processus était simple, Brayann m\'a accompagné du début à la fin. Je recommande à 100%.',
   },
   {
     name: 'Aminata K.',
-    country: 'Côte d\'Ivoire',
+    city: 'Abidjan',
     date: 'Février 2026',
     vehicle: 'A acheté un Chery Tiggo 8',
     text: 'Sceptique au début, j\'ai été convaincue par la transparence. Photos réelles, prix honnête, réponse rapide sur WhatsApp. Mon Chery Tiggo est arrivé en parfait état.',
   },
   {
     name: 'Ibrahim S.',
-    country: 'Sénégal',
+    city: 'Dakar',
     date: 'Janvier 2026',
     vehicle: 'Revendeur partenaire',
     text: 'En tant que revendeur, DRAZONO m\'a ouvert un nouveau marché. Les prix Chine sont imbattables et la qualité est vraiment au rendez-vous. Partenariat gagnant.',
@@ -43,7 +43,7 @@ export default function Testimonials() {
           {testimonials.map((t, i) => (
             <FadeIn key={i} delay={i * 0.1}>
               <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative h-full flex flex-col">
-                <Quote className="w-8 h-8 text-[#2563EB]/10 absolute top-5 right-5" />
+                <Quote className="w-8 h-8 text-brand-500/10 absolute top-5 right-5" />
                 <div className="flex gap-0.5 mb-4">
                   {[...Array(5)].map((_, j) => (
                     <Star key={j} className="w-4 h-4 fill-amber-400 text-amber-400" />
@@ -60,7 +60,7 @@ export default function Testimonials() {
 
                 <div className="flex items-center gap-3">
                   <Image
-                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=2563EB&color=fff&size=80&bold=true`}
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=1845CC&color=fff&size=80&bold=true`}
                     alt={t.name}
                     width={40}
                     height={40}
@@ -69,7 +69,7 @@ export default function Testimonials() {
                   />
                   <div>
                     <p className="text-sm font-semibold text-[#111827]">{t.name}</p>
-                    <p className="text-xs text-gray-500">{t.country} &middot; {t.date}</p>
+                    <p className="text-xs text-gray-600">{t.city} &middot; {t.date}</p>
                   </div>
                 </div>
               </div>

@@ -26,7 +26,7 @@ export default function TrustProof() {
             <h2 className="text-2xl sm:text-3xl font-bold text-[#111827] tracking-tight mb-3">
               Ils nous font confiance
             </h2>
-            <p className="text-gray-500 max-w-lg mx-auto">
+            <p className="text-gray-600 max-w-lg mx-auto">
               Transparence, garanties concrètes et accompagnement humain.
             </p>
           </div>
@@ -39,13 +39,13 @@ export default function TrustProof() {
               href="https://g.page/r/drazono/review"
               target="_blank"
               rel="noopener noreferrer"
-              className="block bg-white rounded-2xl border border-gray-100 p-5 text-center hover:border-[#2563EB]/30 hover:shadow-sm transition-all"
+              className="block bg-white rounded-2xl border border-gray-100 p-5 text-center hover:border-brand-500/30 hover:shadow-sm transition-all"
             >
               <div className="w-11 h-11 bg-amber-50 rounded-xl flex items-center justify-center mx-auto mb-3">
                 <Star className="w-5 h-5 text-amber-500" />
               </div>
               <h3 className="font-semibold text-[#111827] text-sm mb-1">Avis vérifiés</h3>
-              <p className="text-xs text-gray-500">Consultez nos avis sur Google</p>
+              <p className="text-xs text-gray-600">Consultez nos avis sur Google</p>
             </a>
           </FadeIn>
 
@@ -55,13 +55,13 @@ export default function TrustProof() {
               href="https://www.linkedin.com/in/brayann-tarpaga"
               target="_blank"
               rel="noopener noreferrer"
-              className="block bg-white rounded-2xl border border-gray-100 p-5 text-center hover:border-[#2563EB]/30 hover:shadow-sm transition-all"
+              className="block bg-white rounded-2xl border border-gray-100 p-5 text-center hover:border-brand-500/30 hover:shadow-sm transition-all"
             >
               <div className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <UserCheck className="w-5 h-5 text-[#2563EB]" />
+                <UserCheck className="w-5 h-5 text-brand-500" />
               </div>
               <h3 className="font-semibold text-[#111827] text-sm mb-1">Fondateur vérifié</h3>
-              <p className="text-xs text-gray-500">Brayann Tarpaga — LinkedIn</p>
+              <p className="text-xs text-gray-600">Brayann Tarpaga — LinkedIn</p>
             </a>
           </FadeIn>
 
@@ -74,7 +74,7 @@ export default function TrustProof() {
               <h3 className="font-semibold text-[#111827] text-sm mb-1">
                 {requestCount === null ? '...' : requestCount > 0 ? `${requestCount} demande${requestCount > 1 ? 's' : ''} traitée${requestCount > 1 ? 's' : ''}` : 'Premiers clients bienvenus'}
               </h3>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-600">
                 {requestCount !== null && requestCount > 0
                   ? 'Et ce n\'est que le début'
                   : 'Soyez parmi les premiers'}
@@ -89,7 +89,7 @@ export default function TrustProof() {
                 <ShieldCheck className="w-5 h-5 text-violet-600" />
               </div>
               <h3 className="font-semibold text-[#111827] text-sm mb-1">Acompte 100% remboursable</h3>
-              <p className="text-xs text-gray-500">Garanti par contrat</p>
+              <p className="text-xs text-gray-600">Garanti par contrat</p>
             </div>
           </FadeIn>
         </div>

@@ -38,7 +38,7 @@ export default function FeaturedVehicles() {
             </h2>
             <Link
               href="/catalogue"
-              className="text-[#2563EB] hover:text-blue-700 text-sm font-medium inline-flex items-center gap-1 transition-colors"
+              className="text-brand-500 hover:text-blue-700 text-sm font-medium inline-flex items-center gap-1 transition-colors"
             >
               Voir tout <ArrowRight className="w-4 h-4" />
             </Link>
@@ -52,14 +52,14 @@ export default function FeaturedVehicles() {
         ) : vehicles.length === 0 ? (
           <FadeIn>
             <div className="text-center py-16 bg-[#FAFAFA] rounded-2xl border border-gray-100">
-              <Rocket className="w-12 h-12 text-[#2563EB]/30 mx-auto mb-4" />
+              <Rocket className="w-12 h-12 text-brand-500/30 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-[#111827] mb-2">
                 Nouveaux véhicules bientôt disponibles
               </h3>
-              <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
+              <p className="text-sm text-gray-600 mb-6 max-w-md mx-auto">
                 Notre catalogue est en cours de mise à jour. Inscrivez-vous pour être alerté en premier.
               </p>
-              <a href="#newsletter" className="inline-flex items-center gap-2 bg-[#2563EB] text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors">
+              <a href="#newsletter" className="inline-flex items-center gap-2 bg-brand-500 text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-brand-600 transition-colors">
                 <Bell className="w-4 h-4" />
                 M&apos;alerter des nouveautés
               </a>

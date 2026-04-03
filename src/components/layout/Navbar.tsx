@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
 import { Menu, X, MessageCircle, User, LogOut } from 'lucide-react'
 import { NAV_LINKS, WHATSAPP_URL } from '@/lib/constants'
 import { supabase } from '@/lib/supabase'
@@ -12,6 +13,8 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
+  const pathname = usePathname()
+  const isHome = pathname === '/'
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user))
@@ -39,11 +42,15 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0F172A]/75 backdrop-blur-lg border-b border-white/[0.08]">
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-colors ${
+        isHome
+          ? 'bg-[#0A1325]/75 backdrop-blur-lg border-b border-white/[0.08]'
+          : 'bg-white/95 backdrop-blur-sm border-b border-gray-100'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="text-white font-bold text-xl tracking-tight">
-              <span className="text-[#2563EB]">D</span>RAZONO
+            <Link href="/" className={`font-bold text-xl tracking-tight ${isHome ? 'text-white' : 'text-gray-900'}`}>
+              <span className="text-brand-500">D</span>RAZONO
             </Link>
 
             <div className="hidden md:flex items-center gap-6">
@@ -51,7 +58,11 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="nav-link-underline text-gray-300 hover:text-white text-sm transition-colors"
+                  className={`nav-link-underline text-sm py-1.5 px-2 rounded-lg transition-colors ${
+                    isHome
+                      ? 'text-gray-300 hover:text-white'
+                      : 'text-gray-700 hover:text-gray-900'
+                  }`}
                 >
                   {link.label}
                 </Link>
@@ -63,14 +74,18 @@ export default function Navbar() {
                 <>
                   <Link
                     href="/espace-client"
-                    className="inline-flex items-center gap-1.5 text-gray-300 hover:text-white text-sm transition-colors"
+                    className={`inline-flex items-center gap-1.5 text-sm px-3 py-2 h-10 rounded-lg transition-colors ${
+                      isHome ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'
+                    }`}
                   >
                     <User className="w-4 h-4" />
                     Mon compte
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="inline-flex items-center gap-1.5 text-gray-400 hover:text-white text-sm transition-colors"
+                    className={`inline-flex items-center gap-1.5 text-sm px-3 py-2 h-10 rounded-lg transition-colors ${
+                      isHome ? 'text-gray-400 hover:text-white' : 'text-gray-400 hover:text-gray-700'
+                    }`}
                     aria-label="Se déconnecter"
                   >
                     <LogOut className="w-4 h-4" />
@@ -79,7 +94,9 @@ export default function Navbar() {
               ) : (
                 <Link
                   href="/login"
-                  className="text-gray-300 hover:text-white text-sm transition-colors"
+                  className={`text-sm px-3 py-2 h-10 rounded-lg flex items-center transition-colors ${
+                    isHome ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'
+                  }`}
                 >
                   Connexion
                 </Link>
@@ -88,7 +105,11 @@ export default function Navbar() {
                 href={WHATSAPP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-white text-[#0F172A] px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
+                className={`inline-flex items-center gap-2 px-5 py-2.5 h-10 rounded-full text-sm font-medium transition-colors ${
+                  isHome
+                    ? 'bg-white text-[#0A1325] hover:bg-gray-100'
+                    : 'bg-brand-500 text-white hover:bg-brand-600'
+                }`}
               >
                 <MessageCircle className="w-4 h-4" />
                 WhatsApp
@@ -96,7 +117,7 @@ export default function Navbar() {
             </div>
 
             <button
-              className="md:hidden text-white p-1"
+              className={`md:hidden p-1 ${isHome ? 'text-white' : 'text-gray-900'}`}
               onClick={() => setMobileOpen(true)}
               aria-label="Ouvrir le menu"
             >
@@ -127,7 +148,7 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-[280px] bg-[#0F172A] border-l border-white/10 md:hidden flex flex-col"
+              className="fixed top-0 right-0 bottom-0 z-50 w-[280px] bg-[#0A1325] border-l border-white/10 md:hidden flex flex-col"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-5 h-16 border-b border-white/10">
@@ -192,7 +213,7 @@ export default function Navbar() {
                   href={WHATSAPP_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-4 py-3 rounded-full text-sm font-medium transition-colors"
+                  className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-4 py-3 rounded-full text-sm font-medium transition-colors min-h-[48px]"
                   onClick={() => setMobileOpen(false)}
                 >
                   <MessageCircle className="w-4 h-4" />

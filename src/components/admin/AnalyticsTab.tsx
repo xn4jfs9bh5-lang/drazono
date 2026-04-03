@@ -13,7 +13,7 @@ interface DashboardData {
   funnel: { visitors: number; vehicleViews: number; whatsappClicks: number; contacts: number }
 }
 
-const COLORS = ['#2563EB', '#7C3AED', '#10B981', '#F59E0B']
+const COLORS = ['#1845CC', '#7C3AED', '#10B981', '#F59E0B']
 
 export default function AnalyticsTab() {
   const [data, setData] = useState<DashboardData | null>(null)
@@ -86,7 +86,7 @@ export default function AnalyticsTab() {
                 <XAxis dataKey="date" tickFormatter={d => d.slice(5)} tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip />
-                <Line type="monotone" dataKey="count" stroke="#2563EB" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="count" stroke="#1845CC" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           ) : (

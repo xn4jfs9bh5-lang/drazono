@@ -46,7 +46,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     <div className="pt-28 pb-20">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn>
-          <Link href="/blog" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-[#2563EB] mb-8 transition-colors">
+          <Link href="/blog" className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-brand-500 mb-8 transition-colors">
             <ChevronLeft className="w-4 h-4" />
             Retour au blog
           </Link>
@@ -54,7 +54,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 
         {/* Hero image */}
         <FadeIn>
-          <div className="w-full h-48 sm:h-64 bg-gradient-to-br from-[#2563EB]/10 to-[#2563EB]/5 rounded-2xl mb-8 flex items-center justify-center">
+          <div className="w-full h-48 sm:h-64 bg-gradient-to-br from-[#1845CC]/10 to-[#1845CC]/5 rounded-2xl mb-8 flex items-center justify-center">
             <span className="text-gray-400 text-sm">Image de couverture</span>
           </div>
         </FadeIn>
@@ -80,7 +80,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 
             {/* Share buttons */}
             <div className="mt-10 pt-6 border-t border-gray-100 flex items-center gap-3">
-              <span className="text-sm text-gray-500">Partager :</span>
+              <span className="text-sm text-gray-600">Partager :</span>
               <button className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                 <Share2 className="w-3.5 h-3.5" />
                 Copier le lien

@@ -94,7 +94,7 @@ export default function CommentCaMarchePage() {
             <h1 className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight mb-4">
               Comment ça marche
             </h1>
-            <p className="text-gray-500 max-w-xl mx-auto">
+            <p className="text-gray-600 max-w-xl mx-auto">
               De la découverte à la livraison, un processus simple, transparent et accompagné.
             </p>
           </div>
@@ -104,24 +104,26 @@ export default function CommentCaMarchePage() {
         <div className="space-y-8 mb-20">
           {steps.map((step, i) => (
             <FadeIn key={i} delay={i * 0.08}>
-              <div className="flex gap-6 items-start">
-                <div className="shrink-0">
-                  <div className="w-14 h-14 bg-[#2563EB]/10 rounded-2xl flex items-center justify-center">
-                    <step.icon className="w-6 h-6 text-[#2563EB]" />
+              <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md hover:border-brand-500/20 transition-all">
+                <div className="flex gap-6 items-start">
+                  <div className="shrink-0">
+                    <div className="w-16 h-16 bg-brand-500/15 rounded-2xl flex items-center justify-center">
+                      <step.icon className="w-6 h-6 text-brand-500" />
+                    </div>
                   </div>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1 flex-wrap">
-                    <span className="text-xs font-bold text-[#2563EB]">
-                      Étape {i + 1}
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                      <Clock className="w-3 h-3" />
-                      {step.delay} — {step.delayLabel}
-                    </span>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-1 flex-wrap">
+                      <span className="text-xs font-bold text-brand-500">
+                        Étape {i + 1}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                        <Clock className="w-3 h-3" />
+                        {step.delay} — {step.delayLabel}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-[#111827] mb-2">{step.title}</h3>
+                    <p className="text-gray-600 leading-relaxed">{step.description}</p>
                   </div>
-                  <h3 className="text-lg font-semibold text-[#111827] mb-2">{step.title}</h3>
-                  <p className="text-gray-500 leading-relaxed">{step.description}</p>
                 </div>
               </div>
             </FadeIn>
@@ -130,7 +132,7 @@ export default function CommentCaMarchePage() {
 
         {/* Transparence financière */}
         <FadeIn delay={0.5}>
-          <div className="bg-[#0F172A] rounded-2xl p-8 sm:p-10 mb-20">
+          <div className="bg-[#0A1325] rounded-2xl p-8 sm:p-10 mb-20">
             <div className="text-center mb-8">
               <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Banknote className="w-7 h-7 text-white" />
@@ -146,7 +148,7 @@ export default function CommentCaMarchePage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl mx-auto">
               <div className="bg-white/5 border border-white/10 rounded-xl p-5">
                 <div className="flex items-center gap-3 mb-2">
-                  <CreditCard className="w-5 h-5 text-[#2563EB]" />
+                  <CreditCard className="w-5 h-5 text-brand-500" />
                   <h3 className="text-sm font-semibold text-white">Acompte</h3>
                 </div>
                 <p className="text-xs text-gray-400 leading-relaxed">10% à la commande pour sécuriser le véhicule</p>
@@ -154,7 +156,7 @@ export default function CommentCaMarchePage() {
 
               <div className="bg-white/5 border border-white/10 rounded-xl p-5">
                 <div className="flex items-center gap-3 mb-2">
-                  <ShieldCheck className="w-5 h-5 text-[#2563EB]" />
+                  <ShieldCheck className="w-5 h-5 text-brand-500" />
                   <h3 className="text-sm font-semibold text-white">Solde</h3>
                 </div>
                 <p className="text-xs text-gray-400 leading-relaxed">Payé avant expédition, après confirmation finale</p>
@@ -178,7 +180,7 @@ export default function CommentCaMarchePage() {
 
               <div className="bg-white/5 border border-white/10 rounded-xl p-5 sm:col-span-2 lg:col-span-2">
                 <div className="flex items-center gap-3 mb-2">
-                  <Landmark className="w-5 h-5 text-[#2563EB]" />
+                  <Landmark className="w-5 h-5 text-brand-500" />
                   <h3 className="text-sm font-semibold text-white">Mode de paiement</h3>
                 </div>
                 <p className="text-xs text-gray-400 leading-relaxed">Virement bancaire international — traçable et sécurisé</p>
@@ -199,7 +201,7 @@ export default function CommentCaMarchePage() {
                   <AccordionTrigger className="text-left text-[#111827] hover:no-underline">
                     {faq.question}
                   </AccordionTrigger>
-                  <AccordionContent className="text-gray-500 leading-relaxed">
+                  <AccordionContent className="text-gray-600 leading-relaxed">
                     {faq.answer}
                   </AccordionContent>
                 </AccordionItem>

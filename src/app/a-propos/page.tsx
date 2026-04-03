@@ -24,7 +24,7 @@ export default function AProposPage() {
             <h1 className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight mb-4">
               À propos de DRAZONO
             </h1>
-            <p className="text-gray-500 max-w-xl mx-auto">
+            <p className="text-gray-600 max-w-xl mx-auto">
               Rendre les véhicules chinois accessibles au monde entier.
             </p>
           </div>
@@ -33,7 +33,7 @@ export default function AProposPage() {
         {/* Founder section */}
         <FadeIn delay={0.1}>
           <div className="flex flex-col md:flex-row items-center gap-10 mb-20">
-            <div className="w-40 h-40 rounded-full bg-gradient-to-br from-[#2563EB] to-[#1E40AF] flex items-center justify-center shrink-0">
+            <div className="w-40 h-40 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shrink-0">
               <span className="text-5xl font-bold text-white">B</span>
             </div>
             <div>
@@ -71,7 +71,7 @@ export default function AProposPage() {
               ].map((item, i) => (
                 <div key={i} className="bg-[#FAFAFA] rounded-2xl p-6 border border-gray-100">
                   <h3 className="font-semibold text-[#111827] mb-2">{item.title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{item.text}</p>
+                  <p className="text-sm text-gray-600 leading-relaxed">{item.text}</p>
                 </div>
               ))}
             </div>
@@ -87,12 +87,12 @@ export default function AProposPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {commitments.map((c, i) => (
                 <div key={i} className="flex gap-4 items-start">
-                  <div className="w-10 h-10 bg-[#2563EB]/10 rounded-xl flex items-center justify-center shrink-0">
-                    <c.icon className="w-5 h-5 text-[#2563EB]" />
+                  <div className="w-10 h-10 bg-brand-500/10 rounded-xl flex items-center justify-center shrink-0">
+                    <c.icon className="w-5 h-5 text-brand-500" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-[#111827] mb-1">{c.title}</h3>
-                    <p className="text-sm text-gray-500 leading-relaxed">{c.description}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">{c.description}</p>
                   </div>
                 </div>
               ))}

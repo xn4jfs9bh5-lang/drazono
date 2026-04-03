@@ -39,7 +39,7 @@ export default function MentionsLegalesPage() {
                 340 S Lemon Ave #4133<br />
                 Walnut, CA 91789<br />
                 États-Unis<br />
-                <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" className="text-[#2563EB] hover:underline">
+                <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" className="text-brand-500 hover:underline">
                   vercel.com
                 </a>
               </p>
@@ -65,7 +65,7 @@ export default function MentionsLegalesPage() {
               <p>
                 Les données collectées via ce site sont utilisées uniquement dans le cadre de la relation
                 commerciale. Pour plus d&apos;informations, consultez notre{' '}
-                <a href="/politique-confidentialite" className="text-[#2563EB] hover:underline">
+                <a href="/politique-confidentialite" className="text-brand-500 hover:underline">
                   politique de confidentialité
                 </a>.
               </p>

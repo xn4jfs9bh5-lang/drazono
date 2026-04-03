@@ -11,7 +11,7 @@ export default function FounderSection() {
           <div className="flex flex-col md:flex-row items-center gap-10">
             {/* Avatar SVG illustration */}
             <div className="shrink-0 flex flex-col items-center gap-3">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#2563EB] to-[#1E40AF] flex items-center justify-center overflow-hidden">
+              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#1845CC] to-[#1E40AF] flex items-center justify-center overflow-hidden">
                 <svg viewBox="0 0 120 120" className="w-full h-full">
                   <circle cx="60" cy="40" r="22" fill="rgba(255,255,255,0.9)" />
                   <ellipse cx="60" cy="105" rx="35" ry="30" fill="rgba(255,255,255,0.9)" />

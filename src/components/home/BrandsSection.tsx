@@ -38,9 +38,9 @@ export default function BrandsSection() {
               >
                 <Link
                   href={`/catalogue?marque=${brand.slug}`}
-                  className="flex items-center justify-center py-7 px-4 bg-white rounded-xl border border-gray-100 hover:border-[#2563EB]/30 hover:shadow-md transition-all group"
+                  className="flex items-center justify-center py-7 px-4 bg-white rounded-xl border border-gray-100 hover:border-brand-500/30 hover:shadow-md transition-all group"
                 >
-                  <span className="font-bold text-lg text-gray-700 group-hover:text-[#2563EB] transition-colors tracking-tight">
+                  <span className="font-bold text-lg text-gray-700 group-hover:text-brand-500 transition-colors tracking-tight">
                     {brand.name}
                   </span>
                 </Link>

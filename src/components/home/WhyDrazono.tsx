@@ -55,10 +55,10 @@ export default function WhyDrazono() {
                   whileHover={{ rotate: 5 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <reason.icon className="w-7 h-7 text-[#2563EB]" />
+                  <reason.icon className="w-7 h-7 text-brand-500" />
                 </motion.div>
                 <h3 className="font-semibold text-[#111827] mb-2 text-[15px]">{reason.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{reason.description}</p>
+                <p className="text-sm text-gray-600 leading-relaxed">{reason.description}</p>
               </motion.div>
             </FadeIn>
           ))}

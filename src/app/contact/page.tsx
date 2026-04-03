@@ -42,7 +42,7 @@ export default function ContactPage() {
             <h1 className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight mb-4">
               Contactez-nous
             </h1>
-            <p className="text-gray-500">
+            <p className="text-gray-600">
               Réponse moyenne en moins de 2 heures.
             </p>
           </div>
@@ -80,7 +80,7 @@ export default function ContactPage() {
                   <Send className="w-7 h-7 text-emerald-600" />
                 </div>
                 <h3 className="text-lg font-semibold text-[#111827] mb-2">Message envoyé !</h3>
-                <p className="text-gray-500">Nous vous répondrons dans les plus brefs délais.</p>
+                <p className="text-gray-600">Nous vous répondrons dans les plus brefs délais.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -98,7 +98,7 @@ export default function ContactPage() {
                     maxLength={100}
                     value={form.name}
                     onChange={e => setForm({ ...form, name: e.target.value })}
-                    className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
+                    className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
 
@@ -110,7 +110,7 @@ export default function ContactPage() {
                     maxLength={200}
                     value={form.email}
                     onChange={e => setForm({ ...form, email: e.target.value })}
-                    className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
+                    className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   />
                 </div>
 
@@ -120,7 +120,7 @@ export default function ContactPage() {
                     required
                     value={form.subject}
                     onChange={e => setForm({ ...form, subject: e.target.value })}
-                    className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
+                    className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   >
                     <option value="">Sélectionnez un sujet</option>
                     <option value="Infos sur un véhicule">Infos sur un véhicule</option>
@@ -138,14 +138,14 @@ export default function ContactPage() {
                     maxLength={2000}
                     value={form.message}
                     onChange={e => setForm({ ...form, message: e.target.value })}
-                    className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent resize-none"
+                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 resize-none"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-11 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-11 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Envoi en cours...' : 'Envoyer'}
                 </button>

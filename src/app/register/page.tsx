@@ -82,12 +82,12 @@ export default function RegisterPage() {
                 <span className="text-2xl">✓</span>
               </div>
               <h2 className="text-xl font-bold text-[#111827] mb-2">Compte créé !</h2>
-              <p className="text-gray-500 text-sm mb-6">
+              <p className="text-gray-600 text-sm mb-6">
                 Vérifiez votre email pour confirmer votre inscription.
               </p>
               <Link
                 href="/login"
-                className="inline-block h-10 px-6 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg font-medium text-sm leading-10 transition-colors"
+                className="inline-block h-10 px-6 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium text-sm leading-10 transition-colors"
               >
                 Se connecter
               </Link>
@@ -106,7 +106,7 @@ export default function RegisterPage() {
             <h1 className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
               Créer un compte
             </h1>
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-600 text-sm">
               Sauvegardez vos favoris et configurez des alertes.
             </p>
           </div>
@@ -118,57 +118,57 @@ export default function RegisterPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Nom complet</label>
                 <input
                   type="text"
                   required
                   value={form.name}
                   onChange={e => setForm({ ...form, name: e.target.value })}
-                  className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
+                  className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
                 <input
                   type="email"
                   required
                   value={form.email}
                   onChange={e => setForm({ ...form, email: e.target.value })}
-                  className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
+                  className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Mot de passe</label>
                 <input
                   type="password"
                   required
                   minLength={6}
                   value={form.password}
                   onChange={e => setForm({ ...form, password: e.target.value })}
-                  className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
+                  className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone <span className="text-gray-400">(optionnel)</span></label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Téléphone <span className="text-gray-400">(optionnel)</span></label>
                 <input
                   type="tel"
                   value={form.phone}
                   onChange={e => setForm({ ...form, phone: e.target.value })}
-                  className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
+                  className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Pays <span className="text-gray-400">(optionnel)</span></label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Pays <span className="text-gray-400">(optionnel)</span></label>
                 <select
                   value={form.country}
                   onChange={e => setForm({ ...form, country: e.target.value })}
-                  className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
+                  className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                 >
                   <option value="">Sélectionnez votre pays</option>
                   {countries.map(c => <option key={c} value={c}>{c}</option>)}
@@ -178,7 +178,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-11 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Création en cours...' : 'Créer mon compte'}
               </button>
@@ -206,9 +206,9 @@ export default function RegisterPage() {
               Continuer avec Google
             </button>
 
-            <p className="text-center text-sm text-gray-500 mt-6">
+            <p className="text-center text-sm text-gray-600 mt-6">
               Déjà un compte ?{' '}
-              <Link href="/login" className="text-[#2563EB] font-medium hover:underline">
+              <Link href="/login" className="text-brand-500 font-medium hover:underline">
                 Se connecter
               </Link>
             </p>

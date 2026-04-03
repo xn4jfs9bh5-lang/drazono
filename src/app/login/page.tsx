@@ -98,7 +98,7 @@ function LoginForm() {
             <h1 className="text-2xl font-bold text-[#111827] tracking-tight mb-2">
               Connexion
             </h1>
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-600 text-sm">
               Accédez à votre espace client DRAZONO.
             </p>
           </div>
@@ -115,27 +115,27 @@ function LoginForm() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
+                  className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   placeholder="votre@email.com"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Mot de passe</label>
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
+                  className="w-full h-12 rounded-xl border border-gray-300 bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   placeholder="••••••••"
                 />
               </div>
@@ -144,7 +144,7 @@ function LoginForm() {
                 <button
                   type="button"
                   onClick={handleForgotPassword}
-                  className="text-xs text-[#2563EB] hover:underline"
+                  className="text-xs text-brand-500 hover:underline"
                 >
                   Mot de passe oublié ?
                 </button>
@@ -153,7 +153,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 bg-[#2563EB] hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-11 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Connexion...' : 'Se connecter'}
               </button>
@@ -181,9 +181,9 @@ function LoginForm() {
               Continuer avec Google
             </button>
 
-            <p className="text-center text-sm text-gray-500 mt-6">
+            <p className="text-center text-sm text-gray-600 mt-6">
               Pas encore de compte ?{' '}
-              <Link href="/register" className="text-[#2563EB] font-medium hover:underline">
+              <Link href="/register" className="text-brand-500 font-medium hover:underline">
                 S&apos;inscrire
               </Link>
             </p>

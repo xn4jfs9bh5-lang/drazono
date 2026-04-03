@@ -91,7 +91,7 @@ export default function SocialGeneratorModal({ vehicle, onClose }: Props) {
               <button
                 onClick={generate}
                 disabled={loading}
-                className="inline-flex items-center gap-2 bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 text-white px-6 py-3 rounded-xl font-medium text-sm transition-colors"
+                className="inline-flex items-center gap-2 bg-[#1845CC] hover:bg-brand-600 disabled:opacity-50 text-white px-6 py-3 rounded-xl font-medium text-sm transition-colors"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                 Generer les posts
@@ -114,7 +114,7 @@ export default function SocialGeneratorModal({ vehicle, onClose }: Props) {
                         </span>
                         <button
                           onClick={() => copyText(key, text)}
-                          className="flex items-center gap-1 text-xs text-[#2563EB] hover:text-blue-700 font-medium"
+                          className="flex items-center gap-1 text-xs text-[#1845CC] hover:text-blue-700 font-medium"
                         >
                           {copied === key ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                           {copied === key ? 'Copie' : 'Copier'}

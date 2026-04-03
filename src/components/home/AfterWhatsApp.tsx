@@ -29,7 +29,7 @@ export default function AfterWhatsApp() {
           <h2 className="text-2xl sm:text-3xl font-bold text-[#111827] tracking-tight text-center mb-4">
             Ce qui se passe après votre message WhatsApp
           </h2>
-          <p className="text-gray-500 text-center max-w-xl mx-auto mb-14">
+          <p className="text-gray-600 text-center max-w-xl mx-auto mb-14">
             Un processus simple, rapide et transparent.
           </p>
         </FadeIn>
@@ -38,12 +38,12 @@ export default function AfterWhatsApp() {
           {steps.map((step, i) => (
             <FadeIn key={i} delay={i * 0.15}>
               <div className="text-center">
-                <div className="w-16 h-16 bg-[#2563EB]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <step.icon className="w-7 h-7 text-[#2563EB]" />
+                <div className="w-16 h-16 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <step.icon className="w-7 h-7 text-brand-500" />
                 </div>
-                <span className="text-xs font-bold text-[#2563EB] mb-2 block">Étape {i + 1}</span>
+                <span className="text-xs font-bold text-brand-500 mb-2 block">Étape {i + 1}</span>
                 <h3 className="font-semibold text-[#111827] mb-2">{step.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{step.description}</p>
+                <p className="text-sm text-gray-600 leading-relaxed">{step.description}</p>
               </div>
             </FadeIn>
           ))}
