@@ -1,5 +1,7 @@
 'use client'
 
+import { getStoredUTMs } from '@/hooks/useUTMTracking'
+
 type EventType = 'page_view' | 'vehicle_view' | 'whatsapp_click' | 'catalogue_search' | 'newsletter_signup' | 'contact_form'
 
 let sessionId: string | null = null
@@ -33,6 +35,8 @@ export function trackEvent(
   if (now - lastTrack < 200) return
   lastTrack = now
 
+  const utms = getStoredUTMs()
+
   const payload = {
     event_type: eventType,
     session_id: getSessionId(),
@@ -40,6 +44,12 @@ export function trackEvent(
     referrer: document.referrer || undefined,
     page: extra?.page || window.location.pathname,
     vehicle_id: extra?.vehicleId,
+    utm_source: utms.utm_source,
+    utm_medium: utms.utm_medium,
+    utm_campaign: utms.utm_campaign,
+    utm_content: utms.utm_content,
+    utm_term: utms.utm_term,
+    landing_path: utms.landing_path,
   }
 
   // Fire-and-forget using sendBeacon for reliability

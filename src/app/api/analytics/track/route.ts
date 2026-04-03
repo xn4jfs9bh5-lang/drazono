@@ -13,6 +13,12 @@ const schema = z.object({
   session_id: z.string().max(100),
   referrer: z.string().max(500).optional(),
   device: z.enum(['mobile', 'desktop']).optional(),
+  utm_source: z.string().max(100).optional(),
+  utm_medium: z.string().max(100).optional(),
+  utm_campaign: z.string().max(200).optional(),
+  utm_content: z.string().max(200).optional(),
+  utm_term: z.string().max(200).optional(),
+  landing_path: z.string().max(500).optional(),
 })
 
 export async function POST(req: Request) {
@@ -37,6 +43,12 @@ export async function POST(req: Request) {
       session_id: parsed.data.session_id,
       referrer: parsed.data.referrer,
       device: parsed.data.device,
+      utm_source: parsed.data.utm_source || null,
+      utm_medium: parsed.data.utm_medium || null,
+      utm_campaign: parsed.data.utm_campaign || null,
+      utm_content: parsed.data.utm_content || null,
+      utm_term: parsed.data.utm_term || null,
+      landing_path: parsed.data.landing_path || null,
     })
 
     return NextResponse.json({ ok: true })

@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
 import AnalyticsTab from '@/components/admin/AnalyticsTab'
+import MarketingTab from '@/components/admin/MarketingTab'
 import SocialGeneratorModal from '@/components/admin/SocialGeneratorModal'
 import { BRANDS, BODY_TYPES, FUEL_TYPES, TRANSMISSIONS, EUR_TO_FCFA } from '@/lib/constants'
 import { supabase } from '@/lib/supabase'
@@ -19,7 +20,7 @@ import { toast } from 'sonner'
 // Types
 // ---------------------------------------------------------------------------
 
-type Tab = 'dashboard' | 'vehicles' | 'add-vehicle' | 'edit-vehicle' | 'clients' | 'requests' | 'alerts' | 'analytics'
+type Tab = 'dashboard' | 'vehicles' | 'add-vehicle' | 'edit-vehicle' | 'clients' | 'requests' | 'alerts' | 'analytics' | 'marketing'
 
 interface DashboardStats {
   total: number
@@ -61,6 +62,7 @@ const adminTabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'requests', label: 'Demandes', icon: MessageSquare },
   { id: 'alerts', label: 'Alertes', icon: Bell },
   { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+  { id: 'marketing', label: 'Marketing', icon: TrendingUp },
 ]
 
 const STATUS_OPTIONS: { value: Vehicle['status']; label: string; color: string }[] = [
@@ -989,6 +991,7 @@ export default function AdminPage() {
 
             {/* ==================== ANALYTICS ==================== */}
             {activeTab === 'analytics' && <AnalyticsTab />}
+            {activeTab === 'marketing' && <MarketingTab />}
           </div>
         </div>
       </div>

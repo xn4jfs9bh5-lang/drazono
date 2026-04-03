@@ -5,6 +5,7 @@ import { User, Heart, Bell, Clock, FileText, LogOut } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
 import { supabase } from '@/lib/supabase'
 import { BRANDS, BODY_TYPES, FUEL_TYPES } from '@/lib/constants'
+import RecommendedVehicles from '@/components/vehicles/RecommendedVehicles'
 
 const tabs = [
   { id: 'profile', label: 'Mon profil', icon: User },
@@ -274,6 +275,8 @@ export default function EspaceClientPage() {
             </div>
           </FadeIn>
         </div>
+
+        <RecommendedVehicles />
       </div>
     </div>
   )

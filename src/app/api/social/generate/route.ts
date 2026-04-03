@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { verifyAdmin } from '@/lib/api-auth'
 import { rateLimit } from '@/lib/rate-limit'
+import { createAdminClient } from '@/lib/supabase-server'
 
 const schema = z.object({
   brand: z.string(),
@@ -14,6 +15,7 @@ const schema = z.object({
   power: z.string(),
   description: z.string().optional(),
   url: z.string(),
+  vehicleId: z.string().uuid().optional(),
 })
 
 export async function POST(req: Request) {
@@ -36,6 +38,21 @@ export async function POST(req: Request) {
     }
 
     const v = parsed.data
+
+    // Check cache if vehicleId provided
+    if (v.vehicleId) {
+      const supabase = createAdminClient()
+      const { data: cached } = await supabase
+        .from('vehicles')
+        .select('social_posts_cache')
+        .eq('id', v.vehicleId)
+        .single()
+
+      if (cached?.social_posts_cache) {
+        return NextResponse.json({ ...cached.social_posts_cache, source: 'cache' })
+      }
+    }
+
     const apiKey = process.env.ANTHROPIC_API_KEY
     if (!apiKey) {
       // Fallback: generate basic templates without AI
@@ -111,6 +128,16 @@ Réponds UNIQUEMENT avec le JSON, sans aucun texte autour.`
     }
 
     const content = JSON.parse(jsonMatch[0])
+
+    // Cache result if vehicleId provided
+    if (v.vehicleId) {
+      const supabase = createAdminClient()
+      await supabase
+        .from('vehicles')
+        .update({ social_posts_cache: content })
+        .eq('id', v.vehicleId)
+    }
+
     return NextResponse.json({ ...content, source: 'ai' })
   } catch {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
