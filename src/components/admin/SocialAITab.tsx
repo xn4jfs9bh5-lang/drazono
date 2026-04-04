@@ -13,17 +13,12 @@ import {
 // Types
 // ---------------------------------------------------------------------------
 
-interface TikTokPost { script: string; hook: string; hashtags: string }
-interface InstaPost { caption: string; hashtags: string; visual_suggestion: string }
-interface FacebookPost { text: string; cta: string }
-
 interface DayPlan {
   day: string
+  platform: string
   theme: string
-  tiktok: TikTokPost
-  instagram: InstaPost
-  facebook: FacebookPost
-  whatsapp_status: string
+  content: string
+  hashtags?: string
 }
 
 interface VehiclePosts {
@@ -139,12 +134,14 @@ function CalendarView() {
       // Save to Supabase
       const weekStart = new Date().toISOString().slice(0, 10)
       await supabase.from('social_calendar').insert(
-        (data.days ?? []).flatMap((d: DayPlan, i: number) => [
-          { week_start: weekStart, day_number: i, theme: d.theme, platform: 'tiktok', content: JSON.stringify(d.tiktok), status: 'draft' },
-          { week_start: weekStart, day_number: i, theme: d.theme, platform: 'instagram', content: JSON.stringify(d.instagram), status: 'draft' },
-          { week_start: weekStart, day_number: i, theme: d.theme, platform: 'facebook', content: JSON.stringify(d.facebook), status: 'draft' },
-          { week_start: weekStart, day_number: i, theme: d.theme, platform: 'whatsapp', content: d.whatsapp_status, status: 'draft' },
-        ])
+        (data.days ?? []).map((d: DayPlan, i: number) => ({
+          week_start: weekStart,
+          day_number: i,
+          theme: d.theme,
+          platform: (d.platform || 'general').toLowerCase(),
+          content: d.content + (d.hashtags ? '\n' + d.hashtags : ''),
+          status: 'draft',
+        }))
       )
 
       toast.success('Planning généré et sauvegardé !')
@@ -157,27 +154,9 @@ function CalendarView() {
 
   function exportWeek() {
     if (!days.length) return
-    const text = days.map(d => {
-      return `=== ${d.day} — ${d.theme} ===
-
-[TikTok]
-Hook: ${d.tiktok.hook}
-Script: ${d.tiktok.script}
-Hashtags: ${d.tiktok.hashtags}
-
-[Instagram]
-${d.instagram.caption}
-Hashtags: ${d.instagram.hashtags}
-Visuel: ${d.instagram.visual_suggestion}
-
-[Facebook]
-${d.facebook.text}
-CTA: ${d.facebook.cta}
-
-[WhatsApp Status]
-${d.whatsapp_status}
-`
-    }).join('\n\n')
+    const text = days.map(d =>
+      `=== ${d.day} — ${d.platform} — ${d.theme} ===\n${d.content}${d.hashtags ? '\n' + d.hashtags : ''}`
+    ).join('\n\n')
     navigator.clipboard.writeText(text)
     toast.success('Planning complet copié !')
   }
@@ -211,46 +190,25 @@ ${d.whatsapp_status}
 }
 
 function DayCard({ day }: { day: DayPlan }) {
+  const fullContent = day.content + (day.hashtags ? '\n' + day.hashtags : '')
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      {/* Header */}
-      <div className="bg-gray-50 px-4 py-3 border-b border-gray-100">
-        <p className="font-semibold text-[#111827] text-sm">{day.day}</p>
-        <p className="text-xs text-gray-500">{day.theme}</p>
+      <div className="bg-gray-50 px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <p className="font-semibold text-[#111827] text-sm">{day.day}</p>
+          <p className="text-xs text-gray-500">{day.theme}</p>
+        </div>
+        <PlatformBadge platform={(day.platform || '').toLowerCase()} />
       </div>
-      <div className="p-3 space-y-3">
-        {/* TikTok */}
-        <PostBlock platform="tiktok" content={`${day.tiktok.hook}\n\n${day.tiktok.script}\n\n${day.tiktok.hashtags}`}>
-          <p className="text-[11px] text-gray-400 mb-1 font-semibold uppercase">Hook:</p>
-          <p className="text-xs text-[#111827] font-medium mb-1">{day.tiktok.hook}</p>
-          <p className="text-xs text-gray-600 line-clamp-3">{day.tiktok.script}</p>
-        </PostBlock>
-        {/* Instagram */}
-        <PostBlock platform="instagram" content={`${day.instagram.caption}\n\n${day.instagram.hashtags}`}>
-          <p className="text-xs text-gray-600 line-clamp-3">{day.instagram.caption}</p>
-          <p className="text-[10px] text-gray-400 mt-1 italic">Visuel: {day.instagram.visual_suggestion}</p>
-        </PostBlock>
-        {/* Facebook */}
-        <PostBlock platform="facebook" content={`${day.facebook.text}\n\n${day.facebook.cta}`}>
-          <p className="text-xs text-gray-600 line-clamp-3">{day.facebook.text}</p>
-        </PostBlock>
-        {/* WhatsApp */}
-        <PostBlock platform="whatsapp" content={day.whatsapp_status}>
-          <p className="text-xs text-gray-600">{day.whatsapp_status}</p>
-        </PostBlock>
+      <div className="p-3">
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-xs text-gray-600 whitespace-pre-line flex-1">{day.content}</p>
+          <CopyBtn text={fullContent} />
+        </div>
+        {day.hashtags && (
+          <p className="text-[10px] text-brand-500 mt-2">{day.hashtags}</p>
+        )}
       </div>
-    </div>
-  )
-}
-
-function PostBlock({ platform, content, children }: { platform: string; content: string; children: React.ReactNode }) {
-  return (
-    <div className="border border-gray-100 rounded-lg p-2.5">
-      <div className="flex items-center justify-between mb-1.5">
-        <PlatformBadge platform={platform} />
-        <CopyBtn text={content} />
-      </div>
-      {children}
     </div>
   )
 }
@@ -413,34 +371,19 @@ function HistoryView() {
         const key = row.week_start
         if (!dayMap.has(key)) dayMap.set(key, new Map())
         const dm = dayMap.get(key)!
-        if (!dm.has(row.day_number)) dm.set(row.day_number, { day: DAYS[row.day_number] || `Jour ${row.day_number}`, theme: row.theme || '' })
-        const d = dm.get(row.day_number)!
-        try {
-          if (row.platform === 'tiktok') d.tiktok = JSON.parse(row.content)
-          else if (row.platform === 'instagram') d.instagram = JSON.parse(row.content)
-          else if (row.platform === 'facebook') d.facebook = JSON.parse(row.content)
-          else if (row.platform === 'whatsapp') d.whatsapp_status = row.content
-        } catch {
-          // skip malformed
-        }
+        dm.set(row.day_number, {
+          day: DAYS[row.day_number] || `Jour ${row.day_number}`,
+          platform: row.platform || 'general',
+          theme: row.theme || '',
+          content: row.content || '',
+        })
       }
 
       const result: CalendarHistory[] = []
       Array.from(grouped.entries()).forEach(([key, entry]) => {
         const dm = dayMap.get(key)
         if (dm) {
-          const days: DayPlan[] = []
-          Array.from(dm.values()).forEach(d => {
-            days.push({
-              day: d.day || '',
-              theme: d.theme || '',
-              tiktok: d.tiktok || { script: '', hook: '', hashtags: '' },
-              instagram: d.instagram || { caption: '', hashtags: '', visual_suggestion: '' },
-              facebook: d.facebook || { text: '', cta: '' },
-              whatsapp_status: d.whatsapp_status || '',
-            })
-          })
-          entry.days = days
+          entry.days = Array.from(dm.values()) as DayPlan[]
         }
         result.push(entry)
       })

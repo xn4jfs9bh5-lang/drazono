@@ -11,18 +11,16 @@ export async function POST() {
     let fullText = ''
     const stream = client.messages.stream({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      system: `Expert marketing auto réseaux sociaux Afrique. DRAZONO (www.drazono.com). Prix en EUR et FCFA. Tu dois répondre UNIQUEMENT avec un objet JSON valide. Ne mets PAS de backticks, pas de texte avant ou après. Commence directement par { et termine par }.`,
+      max_tokens: 2048,
+      system: `Marketing auto Afrique. DRAZONO (www.drazono.com). Prix EUR+FCFA. JSON valide uniquement, pas de backticks. Commence par { termine par }.`,
       messages: [{
         role: 'user',
-        content: `Planning social 7 jours DRAZONO. Véhicules chinois (BYD, Chery, Haval, MG) prix réalistes. Format JSON: {"days":[{"day":"Lundi","theme":"...","tiktok":{"script":"...","hook":"...","hashtags":"..."},"instagram":{"caption":"...","hashtags":"...","visual_suggestion":"..."},"facebook":{"text":"...","cta":"..."},"whatsapp_status":"..."}]}. 7 jours Lundi à Dimanche.`,
+        content: `7 posts réseaux sociaux DRAZONO, 1 par jour lun-dim. Alterne TikTok/Instagram/Facebook/WhatsApp. Véhicules chinois BYD Chery Haval MG prix réels. JSON: {"days":[{"day":"Lundi","platform":"TikTok","theme":"Deal","content":"texte max 200 chars","hashtags":"#drazono"}]}`,
       }],
     })
 
-    stream.on('text', (text) => { fullText += text })
+    stream.on('text', (t) => { fullText += t })
     await stream.finalMessage()
-
-    console.log('[calendar] len:', fullText.length)
 
     let result
     try { result = JSON.parse(fullText) } catch {
@@ -30,15 +28,10 @@ export async function POST() {
       if (m) try { result = JSON.parse(m[0]) } catch { /* */ }
     }
 
-    if (!result) {
-      console.error('[calendar] parse fail:', fullText.substring(0, 300))
-      return NextResponse.json({ error: 'Génération échouée, réessayez.' }, { status: 500 })
-    }
-
+    if (!result) return NextResponse.json({ error: 'Génération échouée, réessayez.' }, { status: 500 })
     return NextResponse.json(result)
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : 'Erreur serveur'
-    console.error('[calendar] error:', msg)
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : 'Erreur serveur'
     return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

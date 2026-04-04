@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json({
-        tiktok: `🔥 ${v.brand} ${v.model} ${v.year} — ${fmt(v.price_eur)}€ direct Chine\n#drazono #voiturechinoise`,
+        tiktok: `🔥 ${v.brand} ${v.model} ${v.year} — ${fmt(v.price_eur)}€ direct Chine\n#drazono`,
         facebook: `${v.brand} ${v.model} ${v.year} à ${fmt(v.price_eur)}€ sur DRAZONO.\n${v.url}`,
         instagram: `${v.brand} ${v.model} — ${fmt(v.price_eur)}€ 🇨🇳\n#drazono`,
         whatsapp: `*${v.brand} ${v.model} ${v.year}* — ${fmt(v.price_eur)}€\n${v.url}`,
@@ -45,14 +45,14 @@ export async function POST(req: NextRequest) {
     const stream = client.messages.stream({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
-      system: `Marketing automobile Afrique. Contenu viral. Tu dois répondre UNIQUEMENT avec un objet JSON valide. Pas de backticks, pas de texte avant ou après. Commence par { et termine par }.`,
+      system: `Marketing auto Afrique. JSON valide uniquement, pas de backticks. Commence par { termine par }.`,
       messages: [{
         role: 'user',
-        content: `Posts pour: ${v.brand} ${v.model} ${v.year}, ${fmt(v.price_eur)}€ / ${fmt(v.price_fcfa)} FCFA, ${v.condition}, ${v.fuel_type}. Lien: ${v.url}. JSON: {"tiktok":"...","facebook":"...","instagram":"...","whatsapp":"..."}. Hashtags #drazono #voiturechinoise.`,
+        content: `4 posts courts pour ${v.brand} ${v.model} ${v.year}, ${fmt(v.price_eur)}€/${fmt(v.price_fcfa)} FCFA, ${v.fuel_type}. Lien: ${v.url}. JSON: {"tiktok":"max 150 chars","facebook":"max 200 chars","instagram":"max 150 chars","whatsapp":"max 150 chars"} avec #drazono`,
       }],
     })
 
-    stream.on('text', (text) => { fullText += text })
+    stream.on('text', (t) => { fullText += t })
     await stream.finalMessage()
 
     let content
@@ -71,16 +71,14 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Cache
     if (v.vehicleId) {
       const sb = createAdminClient()
       await sb.from('vehicles').update({ social_posts_cache: content }).eq('id', v.vehicleId)
     }
 
     return NextResponse.json({ ...content, source: 'ai' })
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : 'Erreur serveur'
-    console.error('[social/generate] error:', msg)
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : 'Erreur serveur'
     return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

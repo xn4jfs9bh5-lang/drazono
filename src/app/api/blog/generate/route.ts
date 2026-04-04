@@ -8,26 +8,22 @@ const client = new Anthropic()
 
 export async function POST(req: NextRequest) {
   try {
-    const { articleType, subject, keyword, country, length: len, generateFaq, generateTable } = await req.json()
+    const { articleType, subject, keyword, country } = await req.json()
     if (!subject) return NextResponse.json({ error: 'Sujet requis' }, { status: 400 })
-
-    const words = len === 'short' ? 800 : len === 'long' ? 2500 : 1500
 
     let fullText = ''
     const stream = client.messages.stream({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      system: `Rédacteur SEO automobile pour DRAZONO (www.drazono.com), import véhicules chinois Afrique. Prix en EUR et FCFA. Prénoms africains. Paragraphes courts. Tu dois répondre UNIQUEMENT avec un objet JSON valide. Ne mets PAS de backticks, pas de texte avant ou après. Commence directement par { et termine par }.`,
+      max_tokens: 2048,
+      system: `Rédacteur SEO auto DRAZONO (www.drazono.com), import véhicules chinois Afrique. Prix EUR+FCFA. Réponds UNIQUEMENT en JSON valide, pas de backticks. Commence par { termine par }.`,
       messages: [{
         role: 'user',
-        content: `Écris un article "${articleType || 'guide'}" sur: ${subject}. ${keyword ? 'Mot-clé: ' + keyword + '.' : ''} Pays: ${country || 'Général'}. ${words} mots. ${generateFaq !== false ? 'Inclus FAQ.' : ''} ${generateTable !== false ? 'Inclus tableau comparatif.' : ''} Format JSON: {"title":"...","slug":"...","content":"markdown","meta_description":"...","keywords":["..."],"faq":[{"question":"...","answer":"..."}],"suggested_articles":["..."]}.`,
+        content: `Article court (500 mots) type "${articleType || 'guide'}" sur: ${subject}. ${keyword ? 'SEO: ' + keyword : ''} Pays: ${country || 'Général'}. JSON: {"title":"max 60 chars","slug":"url-slug","content":"markdown 500 mots","meta_description":"max 155 chars"}`,
       }],
     })
 
-    stream.on('text', (text) => { fullText += text })
+    stream.on('text', (t) => { fullText += t })
     await stream.finalMessage()
-
-    console.log('[blog] len:', fullText.length)
 
     let result
     try { result = JSON.parse(fullText) } catch {
@@ -35,15 +31,10 @@ export async function POST(req: NextRequest) {
       if (m) try { result = JSON.parse(m[0]) } catch { /* */ }
     }
 
-    if (!result) {
-      console.error('[blog] parse fail:', fullText.substring(0, 300))
-      return NextResponse.json({ error: 'Génération échouée, réessayez.' }, { status: 500 })
-    }
-
+    if (!result) return NextResponse.json({ error: 'Génération échouée, réessayez.' }, { status: 500 })
     return NextResponse.json(result)
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : 'Erreur serveur'
-    console.error('[blog] error:', msg)
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : 'Erreur serveur'
     return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
