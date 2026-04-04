@@ -40,6 +40,6 @@ export async function GET(req: NextRequest) {
     .update({ email_unsubscribed: true })
     .eq('email', email)
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://drazono.vercel.app'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.drazono.com'
   return Response.redirect(`${siteUrl}/desabonnement`)
 }

@@ -16,14 +16,14 @@ export const metadata: Metadata = {
     template: '%s — DRAZONO',
   },
   description: 'Achetez des véhicules neufs et d\'occasion importés directement de Chine. BYD, Chery, Geely, Haval — prix usine, livraison mondiale, zéro intermédiaire.',
-  metadataBase: new URL('https://drazono.vercel.app'),
+  metadataBase: new URL('https://www.drazono.com'),
   openGraph: {
     title: 'DRAZONO — Import véhicules chinois au meilleur prix',
     description: 'Véhicules neufs et d\'occasion depuis la Chine. Prix réel vendeur, livraison dans 30+ pays.',
     siteName: 'DRAZONO',
     type: 'website',
     locale: 'fr_FR',
-    url: 'https://drazono.vercel.app',
+    url: 'https://www.drazono.com',
   },
   twitter: {
     card: 'summary_large_image',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     description: 'Véhicules neufs et d\'occasion depuis la Chine. Prix réel vendeur, livraison dans 30+ pays.',
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: 'https://drazono.vercel.app' },
+  alternates: { canonical: 'https://www.drazono.com' },
 }
 
 export default function RootLayout({

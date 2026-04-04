@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       { auth: { persistSession: false } }
     )
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://drazono.vercel.app'
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.drazono.com'
     const resendKey = process.env.RESEND_API_KEY
     if (!resendKey) {
       return NextResponse.json({ ok: false, error: 'RESEND_API_KEY missing' }, { status: 500 })

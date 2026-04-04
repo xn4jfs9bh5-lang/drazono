@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { WHATSAPP_NUMBER } from '@/lib/constants'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://drazono.vercel.app'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.drazono.com'
 
 export async function scheduleOnboardingSequence(
   supabase: SupabaseClient,

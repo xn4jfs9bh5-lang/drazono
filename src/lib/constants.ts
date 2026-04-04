@@ -1,6 +1,6 @@
 export const SITE_NAME = 'DRAZONO'
 export const SITE_DESCRIPTION = 'Véhicules neufs et d\'occasion depuis la Chine. Prix réel vendeur, livraison mondiale en option.'
-export const SITE_URL = 'https://drazono.vercel.app'
+export const SITE_URL = 'https://www.drazono.com'
 
 // TODO: remplacer par le vrai numéro WhatsApp de Brayann
 // Set NEXT_PUBLIC_WHATSAPP_NUMBER in .env.local to override

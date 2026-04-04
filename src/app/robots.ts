@@ -13,6 +13,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: '/',
       },
     ],
-    sitemap: 'https://drazono.vercel.app/sitemap.xml',
+    sitemap: 'https://www.drazono.com/sitemap.xml',
   }
 }

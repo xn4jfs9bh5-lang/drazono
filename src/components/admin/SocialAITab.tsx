@@ -57,13 +57,19 @@ function PlatformBadge({ platform }: { platform: string }) {
 }
 
 function CopyBtn({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
   return (
     <button
-      onClick={() => { navigator.clipboard.writeText(text); toast.success('Copié !') }}
+      onClick={() => {
+        navigator.clipboard.writeText(text)
+        setCopied(true)
+        toast.success('Copié !')
+        setTimeout(() => setCopied(false), 2000)
+      }}
       className="p-1 rounded hover:bg-gray-100 transition-colors shrink-0"
       title="Copier"
     >
-      <Copy className="w-3.5 h-3.5 text-gray-400" />
+      {copied ? <CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-gray-400" />}
     </button>
   )
 }
@@ -286,20 +292,21 @@ function VehiclePostView() {
           fuel_type: selected.fuel_type,
           power: selected.power || '',
           description: selected.description || '',
-          url: `https://drazono.vercel.app/vehicule/${selected.id}`,
+          url: `https://www.drazono.com/vehicule/${selected.id}`,
           vehicleId: selected.id,
         }),
       })
 
       if (!res.ok) {
-        toast.error('Erreur de génération')
+        const err = await res.json().catch(() => ({ error: 'Erreur réseau' }))
+        toast.error(err.error || 'Erreur de génération')
         setGenerating(false)
         return
       }
 
       const data = await res.json()
       setPosts(data)
-      toast.success('Posts générés !')
+      toast.success(data.source === 'cache' ? 'Posts chargés depuis le cache' : 'Posts générés !')
     } catch {
       toast.error('Erreur réseau')
     }

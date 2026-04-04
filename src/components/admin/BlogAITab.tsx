@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import {
   Loader2, FileText, Copy, Eye, Edit3, Send, Save,
-  Trash2, CheckCircle, Globe, RefreshCw, BookOpen
+  Trash2, CheckCircle, Globe, RefreshCw, BookOpen, ExternalLink, Check
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -26,6 +26,8 @@ interface BlogPost {
   id: string
   slug: string
   title: string
+  content: string
+  cover_image: string
   published: boolean
   created_at: string
   updated_at: string
@@ -53,25 +55,34 @@ const COUNTRIES = [
 ]
 
 // ---------------------------------------------------------------------------
-// Markdown renderer (simple)
+// Markdown renderer
 // ---------------------------------------------------------------------------
 
 function renderMarkdown(md: string): string {
   return md
     .replace(/^### (.+)$/gm, '<h3 class="text-lg font-semibold text-[#111827] mt-6 mb-2">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-[#111827] mt-8 mb-3">$1</h2>')
+    .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold text-[#111827] mt-8 mb-3 pl-3 border-l-4 border-brand-500">$1</h2>')
     .replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold text-[#111827] mt-6 mb-4">$1</h1>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-brand-500/30 bg-gray-50 px-4 py-3 my-4 text-gray-600 italic rounded-r-lg">$1</blockquote>')
     .replace(/^\- (.+)$/gm, '<li class="ml-4 text-gray-600">$1</li>')
     .replace(/^\| (.+) \|$/gm, (match) => {
       const cells = match.replace(/^\| | \|$/g, '').split(' | ')
-      return '<tr>' + cells.map(c => `<td class="border border-gray-200 px-3 py-2 text-sm">${c.trim()}</td>`).join('') + '</tr>'
+      return '<tr class="even:bg-gray-50">' + cells.map(c =>
+        c.trim().startsWith('---')
+          ? ''
+          : `<td class="border border-gray-200 px-3 py-2 text-sm text-gray-700">${c.trim()}</td>`
+      ).join('') + '</tr>'
     })
-    .replace(/^(?!<[hluot])((?!<).+)$/gm, '<p class="text-gray-600 leading-relaxed mb-3">$1</p>')
-    .replace(/<\/li>\n<li/g, '</li><li')
-    .replace(new RegExp('(<li[\\s\\S]*?<\\/li>)', 'g'), '<ul class="list-disc space-y-1 mb-4">$1</ul>')
-    .replace(new RegExp('(<tr>[\\s\\S]*?<\\/tr>(?:\\s*<tr>[\\s\\S]*?<\\/tr>)*)', 'g'), '<table class="w-full border-collapse border border-gray-200 rounded-lg overflow-hidden mb-4">$1</table>')
+    .replace(/^(?!<[hluotb])((?!<).+)$/gm, '<p class="text-gray-600 leading-relaxed mb-3">$1</p>')
+    .replace(new RegExp('(<li[\\s\\S]*?</li>)', 'g'), '<ul class="list-disc space-y-1 mb-4 pl-2">$1</ul>')
+    .replace(new RegExp('(<tr[\\s\\S]*?</tr>(?:\\s*<tr[\\s\\S]*?</tr>)*)', 'g'),
+      '<div class="overflow-x-auto mb-4"><table class="w-full border-collapse border border-gray-200 rounded-lg text-sm">$1</table></div>')
+}
+
+function countWords(text: string): number {
+  return text.trim().split(/\s+/).filter(Boolean).length
 }
 
 // ---------------------------------------------------------------------------
@@ -83,7 +94,6 @@ export default function BlogAITab() {
 
   return (
     <div className="space-y-6">
-      {/* Sub-navigation */}
       <div className="flex gap-2 border-b border-gray-100 pb-3">
         <button
           onClick={() => setView('generate')}
@@ -127,7 +137,10 @@ function GenerateView() {
   const [article, setArticle] = useState<GeneratedArticle | null>(null)
   const [editMode, setEditMode] = useState(false)
   const [editContent, setEditContent] = useState('')
+  const [coverImage, setCoverImage] = useState('')
   const [saving, setSaving] = useState(false)
+  const [publishedSlug, setPublishedSlug] = useState<string | null>(null)
+  const [progress, setProgress] = useState(0)
 
   const inputClass = 'w-full h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors'
   const labelClass = 'block text-sm font-medium text-gray-700 mb-1'
@@ -136,6 +149,13 @@ function GenerateView() {
     if (!subject.trim()) { toast.error('Entrez un sujet'); return }
     setGenerating(true)
     setArticle(null)
+    setPublishedSlug(null)
+    setProgress(0)
+
+    // Animated progress
+    const interval = setInterval(() => {
+      setProgress(p => Math.min(p + Math.random() * 8, 90))
+    }, 500)
 
     try {
       const res = await fetch('/api/blog/generate', {
@@ -144,10 +164,14 @@ function GenerateView() {
         body: JSON.stringify({ articleType, subject, keyword, country, length, generateFaq, generateTable }),
       })
 
+      clearInterval(interval)
+      setProgress(100)
+
       if (!res.ok) {
         const err = await res.json()
         toast.error(err.error || 'Erreur de génération')
         setGenerating(false)
+        setProgress(0)
         return
       }
 
@@ -155,19 +179,23 @@ function GenerateView() {
       setArticle(data)
       setEditContent(data.content)
       toast.success('Article généré !')
-    } catch {
-      toast.error('Erreur réseau')
+    } catch (err) {
+      clearInterval(interval)
+      toast.error(err instanceof Error ? err.message : 'Erreur réseau')
     }
     setGenerating(false)
+    setTimeout(() => setProgress(0), 500)
   }
 
   async function handleSave(published: boolean) {
     if (!article) return
+
+    if (published && !confirm('Publier cet article sur le blog ?')) return
+
     setSaving(true)
 
     const content = editMode ? editContent : article.content
 
-    // Build FAQ JSON-LD
     const faqJsonLd = article.faq?.length ? JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
@@ -186,7 +214,7 @@ function GenerateView() {
       slug: article.slug,
       title: article.title,
       content: fullContent,
-      cover_image: '',
+      cover_image: coverImage || '',
       published,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'slug' })
@@ -194,18 +222,15 @@ function GenerateView() {
     setSaving(false)
 
     if (error) {
-      toast.error('Erreur lors de l\'enregistrement')
+      toast.error('Erreur: ' + error.message)
     } else {
       toast.success(published ? 'Article publié !' : 'Brouillon enregistré')
+      if (published) setPublishedSlug(article.slug)
     }
   }
 
-  function copyMarkdown() {
-    const content = editMode ? editContent : article?.content
-    if (!content) return
-    navigator.clipboard.writeText(content)
-    toast.success('Markdown copié !')
-  }
+  const displayContent = editMode ? editContent : (article?.content || '')
+  const wordCount = countWords(displayContent)
 
   return (
     <div className="space-y-6">
@@ -256,10 +281,20 @@ function GenerateView() {
         <button
           onClick={handleGenerate}
           disabled={generating || !subject.trim()}
-          className="mt-5 flex items-center justify-center gap-2 h-11 px-6 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
+          className="mt-5 flex items-center justify-center gap-2 h-11 px-6 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 w-full sm:w-auto"
         >
           {generating ? <><Loader2 className="w-4 h-4 animate-spin" /> Génération en cours...</> : <><FileText className="w-4 h-4" /> Générer l&apos;article</>}
         </button>
+
+        {/* Progress bar */}
+        {generating && (
+          <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-brand-500 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Result */}
@@ -270,20 +305,26 @@ function GenerateView() {
             <h2 className="text-xl font-bold text-[#111827] mb-1">{article.title}</h2>
             <p className="text-sm text-gray-600 mb-3">{article.meta_description}</p>
             <p className="text-xs text-gray-400 mb-3">Slug: /{article.slug}</p>
+
             {/* Keywords */}
             <div className="flex flex-wrap gap-1.5 mb-4">
               {article.keywords?.map((kw, i) => (
                 <span key={i} className="text-xs px-2.5 py-1 bg-brand-500/10 text-brand-500 rounded-full font-medium">{kw}</span>
               ))}
             </div>
+
+            {/* Cover image URL */}
+            <div className="mb-4">
+              <label className={labelClass}>Image de couverture (URL, optionnel)</label>
+              <input type="url" value={coverImage} onChange={e => setCoverImage(e.target.value)} className={inputClass} placeholder="https://..." />
+            </div>
+
             {/* Action buttons */}
             <div className="flex flex-wrap gap-2">
               <button onClick={() => setEditMode(!editMode)} className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                 {editMode ? <><Eye className="w-4 h-4" /> Aperçu</> : <><Edit3 className="w-4 h-4" /> Modifier</>}
               </button>
-              <button onClick={copyMarkdown} className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                <Copy className="w-4 h-4" /> Copier markdown
-              </button>
+              <CopyButton text={displayContent} label="Copier markdown" />
               <button onClick={() => handleSave(true)} disabled={saving} className="flex items-center gap-1.5 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Publier
               </button>
@@ -291,11 +332,33 @@ function GenerateView() {
                 <Save className="w-4 h-4" /> Brouillon
               </button>
             </div>
+
+            {/* Published link */}
+            {publishedSlug && (
+              <div className="mt-3 p-3 bg-emerald-50 border border-emerald-100 rounded-lg flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                <a href={`/blog/${publishedSlug}`} target="_blank" rel="noopener noreferrer" className="text-sm text-emerald-700 font-medium hover:underline flex items-center gap-1">
+                  Voir l&apos;article sur le blog <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            )}
           </div>
 
           {/* Content preview / edit */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-            <h3 className="font-semibold text-[#111827] mb-3">Contenu</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-[#111827]">Contenu</h3>
+              <span className="text-xs text-gray-400">{wordCount} mots</span>
+            </div>
+
+            {/* Cover image preview */}
+            {coverImage && !editMode && (
+              <div className="mb-4 rounded-xl overflow-hidden bg-gray-100 aspect-[2/1]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={coverImage} alt="Couverture" className="w-full h-full object-cover" />
+              </div>
+            )}
+
             {editMode ? (
               <textarea
                 value={editContent}
@@ -304,8 +367,8 @@ function GenerateView() {
               />
             ) : (
               <div
-                className="prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ __html: renderMarkdown(editContent || article.content) }}
+                className="prose prose-lg max-w-none"
+                dangerouslySetInnerHTML={{ __html: renderMarkdown(displayContent) }}
               />
             )}
           </div>
@@ -328,7 +391,7 @@ function GenerateView() {
           {/* Suggested articles */}
           {article.suggested_articles?.length > 0 && (
             <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-              <h3 className="font-semibold text-[#111827] mb-3">Articles suggérés à rédiger</h3>
+              <h3 className="font-semibold text-[#111827] mb-3">Articles suggérés</h3>
               <ul className="space-y-2">
                 {article.suggested_articles.map((s, i) => (
                   <li key={i} className="flex items-center gap-2 text-sm text-gray-600">
@@ -346,6 +409,27 @@ function GenerateView() {
 }
 
 // ---------------------------------------------------------------------------
+// Copy Button with "Copié !" feedback
+// ---------------------------------------------------------------------------
+
+function CopyButton({ text, label }: { text: string; label: string }) {
+  const [copied, setCopied] = useState(false)
+
+  function handleCopy() {
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    toast.success('Copié !')
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <button onClick={handleCopy} className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+      {copied ? <><Check className="w-4 h-4 text-emerald-600" /> Copié !</> : <><Copy className="w-4 h-4" /> {label}</>}
+    </button>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Articles List View
 // ---------------------------------------------------------------------------
 
@@ -357,7 +441,7 @@ function ArticlesListView() {
     setLoading(true)
     const { data } = await supabase
       .from('blog_posts')
-      .select('id, slug, title, published, created_at, updated_at')
+      .select('*')
       .order('created_at', { ascending: false })
     setArticles(data ?? [])
     setLoading(false)
@@ -379,7 +463,16 @@ function ArticlesListView() {
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="bg-white rounded-xl border border-gray-100 p-4 animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-2/3 mb-2" />
+            <div className="h-3 bg-gray-100 rounded w-1/3" />
+          </div>
+        ))}
+      </div>
+    )
   }
 
   return (
@@ -395,7 +488,6 @@ function ArticlesListView() {
         <div className="text-center py-16 text-gray-400">
           <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-200" />
           <p>Aucun article pour le moment.</p>
-          <p className="text-sm mt-1">Utilisez le générateur IA pour créer votre premier article.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -411,18 +503,15 @@ function ArticlesListView() {
                 <p className="text-xs text-gray-400">/{a.slug} &middot; {new Date(a.created_at).toLocaleDateString('fr-FR')}</p>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
-                <button
-                  onClick={() => togglePublish(a.id, a.published)}
-                  className="p-2 rounded-lg text-gray-400 hover:text-brand-500 hover:bg-brand-500/5 transition-colors"
-                  title={a.published ? 'Dépublier' : 'Publier'}
-                >
+                {a.published && (
+                  <a href={`/blog/${a.slug}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg text-gray-400 hover:text-brand-500 hover:bg-brand-500/5 transition-colors" title="Voir">
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+                <button onClick={() => togglePublish(a.id, a.published)} className="p-2 rounded-lg text-gray-400 hover:text-brand-500 hover:bg-brand-500/5 transition-colors" title={a.published ? 'Dépublier' : 'Publier'}>
                   <CheckCircle className="w-4 h-4" />
                 </button>
-                <button
-                  onClick={() => deleteArticle(a.id)}
-                  className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                  title="Supprimer"
-                >
+                <button onClick={() => deleteArticle(a.id)} className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors" title="Supprimer">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>

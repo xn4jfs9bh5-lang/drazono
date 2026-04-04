@@ -8,7 +8,7 @@ const supabase = createClient(
 )
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://drazono.vercel.app'
+  const baseUrl = 'https://www.drazono.com'
 
   const staticPages = [
     '', '/catalogue', '/comparer', '/demande', '/comment-ca-marche',

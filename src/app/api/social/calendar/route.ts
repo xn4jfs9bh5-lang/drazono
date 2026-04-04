@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server'
 import { verifyAdmin } from '@/lib/api-auth'
 import { rateLimit } from '@/lib/rate-limit'
 
-const SYSTEM_PROMPT = `Tu es un expert en marketing automobile sur les réseaux sociaux pour le marché africain francophone. Tu crées du contenu viral pour TikTok, Instagram, Facebook et WhatsApp Status. La marque est DRAZONO (drazono.com), import direct de véhicules chinois.
+export const maxDuration = 60
+
+const SYSTEM_PROMPT = `Tu es un expert en marketing automobile sur les réseaux sociaux pour le marché africain francophone. Tu crées du contenu viral pour TikTok, Instagram, Facebook et WhatsApp Status. La marque est DRAZONO (www.drazono.com), import direct de véhicules chinois.
 
 RÈGLES :
 - Chaque post TikTok commence par un HOOK choc (3 premières secondes)
@@ -31,6 +33,30 @@ FORMAT JSON UNIQUEMENT :
 
 Génère exactement 7 jours (Lundi à Dimanche). Réponds UNIQUEMENT avec le JSON valide.`
 
+async function callAnthropic(apiKey: string, attempt = 0): Promise<Response> {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8192,
+      messages: [{ role: 'user', content: 'Génère un planning social media complet pour la semaine de DRAZONO. Inclus des véhicules populaires chinois (BYD, Chery, Haval, MG, Geely) avec des prix réalistes. Le site est www.drazono.com.' }],
+      system: SYSTEM_PROMPT,
+    }),
+  })
+
+  if (!response.ok && attempt < 1) {
+    await new Promise(r => setTimeout(r, 2000))
+    return callAnthropic(apiKey, attempt + 1)
+  }
+
+  return response
+}
+
 export async function POST() {
   try {
     const { authorized, userId } = await verifyAdmin()
@@ -48,23 +74,11 @@ export async function POST() {
       return NextResponse.json({ error: 'ANTHROPIC_API_KEY non configurée' }, { status: 500 })
     }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 8192,
-        messages: [{ role: 'user', content: 'Génère un planning social media complet pour la semaine de DRAZONO. Inclus des véhicules populaires chinois (BYD, Chery, Haval, MG, Geely) avec des prix réalistes.' }],
-        system: SYSTEM_PROMPT,
-      }),
-    })
+    const response = await callAnthropic(apiKey)
 
     if (!response.ok) {
-      return NextResponse.json({ error: `Erreur API: ${response.status}` }, { status: 502 })
+      const errText = await response.text()
+      return NextResponse.json({ error: `Erreur API (${response.status}): ${errText.slice(0, 200)}` }, { status: 502 })
     }
 
     const aiResponse = await response.json()
@@ -72,7 +86,7 @@ export async function POST() {
 
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (!jsonMatch) {
-      return NextResponse.json({ error: 'Réponse IA invalide' }, { status: 500 })
+      return NextResponse.json({ error: 'Réponse IA invalide — pas de JSON' }, { status: 500 })
     }
 
     const content = JSON.parse(jsonMatch[0])

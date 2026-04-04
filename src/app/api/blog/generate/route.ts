@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { verifyAdmin } from '@/lib/api-auth'
 import { rateLimit } from '@/lib/rate-limit'
 
+export const maxDuration = 60
+
 const schema = z.object({
   articleType: z.string(),
   subject: z.string().min(3).max(300),
@@ -15,7 +17,7 @@ const schema = z.object({
 
 const SYSTEM_PROMPT = `Tu es un expert en rédaction SEO spécialisé dans l'automobile et l'import de véhicules chinois pour l'Afrique de l'Ouest. Tu rédiges en français courant, naturel, jamais robotique. Ton ton est celui d'un conseiller de confiance qui connaît les réalités du terrain africain.
 
-Tu écris pour DRAZONO (drazono.com), plateforme d'import direct de véhicules chinois (BYD, Chery, Geely, Haval, MG, NIO, Xpeng) sans intermédiaire. Support WhatsApp, livraison mondiale.
+Tu écris pour DRAZONO (www.drazono.com), plateforme d'import direct de véhicules chinois (BYD, Chery, Geely, Haval, MG, NIO, Xpeng) sans intermédiaire. Support WhatsApp, livraison mondiale.
 
 RÈGLES OBLIGATOIRES :
 - Commence TOUJOURS par une histoire ou un fait choc, jamais par "Dans cet article"
@@ -45,6 +47,30 @@ FORMAT DE SORTIE JSON UNIQUEMENT :
 Réponds UNIQUEMENT avec le JSON valide, sans aucun texte autour.`
 
 const LENGTH_MAP = { short: '800', medium: '1500', long: '2500' }
+
+async function callAnthropic(apiKey: string, prompt: string, attempt = 0): Promise<Response> {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4096,
+      messages: [{ role: 'user', content: prompt }],
+      system: SYSTEM_PROMPT,
+    }),
+  })
+
+  if (!response.ok && attempt < 1) {
+    await new Promise(r => setTimeout(r, 2000))
+    return callAnthropic(apiKey, prompt, attempt + 1)
+  }
+
+  return response
+}
 
 export async function POST(req: Request) {
   try {
@@ -83,24 +109,11 @@ ${v.generateTable ? 'Inclure au moins un tableau comparatif détaillé' : ''}
 
 Génère l'article complet au format JSON comme spécifié.`
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 8192,
-        messages: [{ role: 'user', content: prompt }],
-        system: SYSTEM_PROMPT,
-      }),
-    })
+    const response = await callAnthropic(apiKey, prompt)
 
     if (!response.ok) {
       const errText = await response.text()
-      return NextResponse.json({ error: `Erreur API Anthropic: ${response.status}`, details: errText }, { status: 502 })
+      return NextResponse.json({ error: `Erreur API Anthropic (${response.status}): ${errText.slice(0, 200)}` }, { status: 502 })
     }
 
     const aiResponse = await response.json()
@@ -108,12 +121,12 @@ Génère l'article complet au format JSON comme spécifié.`
 
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (!jsonMatch) {
-      return NextResponse.json({ error: 'Réponse IA invalide', raw: text }, { status: 500 })
+      return NextResponse.json({ error: 'Réponse IA invalide — pas de JSON détecté' }, { status: 500 })
     }
 
     const content = JSON.parse(jsonMatch[0])
     return NextResponse.json(content)
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Erreur serveur' }, { status: 500 })
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Erreur serveur inattendue' }, { status: 500 })
   }
 }

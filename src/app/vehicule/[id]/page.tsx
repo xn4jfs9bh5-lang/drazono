@@ -200,7 +200,7 @@ export default function VehiclePage() {
     description: vehicle.description, image: images[0] || undefined,
     offers: { '@type': 'Offer', price: vehicle.price_eur, priceCurrency: 'EUR',
       availability: vehicle.status === 'disponible' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      url: `https://drazono.vercel.app/vehicule/${vehicle.id}` },
+      url: `https://www.drazono.com/vehicule/${vehicle.id}` },
   }
 
   return (
