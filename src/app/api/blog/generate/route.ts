@@ -1,3 +1,4 @@
+import Anthropic from '@anthropic-ai/sdk'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { verifyAdmin } from '@/lib/api-auth'
@@ -28,64 +29,20 @@ RÈGLES :
 - CTA WhatsApp DRAZONO à la fin
 - Mentionne : zéro intermédiaire, prix usine, support WhatsApp
 
-IMPORTANT: Réponds UNIQUEMENT avec le JSON demandé. Pas de texte avant, pas de texte après, pas de backticks, pas de markdown. Juste le JSON brut.
+IMPORTANT: Réponds UNIQUEMENT avec du JSON valide. Aucun texte avant ou après. Aucun backtick. Juste le JSON brut.
 
 Format :
 {"title":"...","slug":"...","content":"markdown complet","meta_description":"155 chars max","keywords":["..."],"faq":[{"question":"...","answer":"..."}],"suggested_articles":["...","...","..."]}`
 
 const LENGTH_MAP = { short: '800', medium: '1500', long: '2500' }
 
-async function streamAnthropic(apiKey: string, system: string, userPrompt: string, signal: AbortSignal): Promise<string> {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2048,
-      stream: true,
-      system,
-      messages: [{ role: 'user', content: userPrompt }],
-    }),
-    signal,
-  })
-
-  if (!response.ok) {
-    const errBody = await response.text().catch(() => '')
-    throw new Error(`Anthropic ${response.status}: ${errBody.slice(0, 200)}`)
-  }
-
-  const reader = response.body!.getReader()
-  const decoder = new TextDecoder()
-  let fullText = ''
-
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    const chunk = decoder.decode(value)
-    for (const line of chunk.split('\n')) {
-      if (!line.startsWith('data: ')) continue
-      const data = line.slice(6)
-      if (data === '[DONE]') continue
-      try {
-        const parsed = JSON.parse(data)
-        if (parsed.type === 'content_block_delta') {
-          fullText += parsed.delta?.text || ''
-        }
-      } catch { /* skip malformed SSE lines */ }
-    }
-  }
-
-  return fullText
-}
-
 export async function POST(req: Request) {
   try {
-    const apiKey = process.env.ANTHROPIC_API_KEY
-    console.log('[blog/generate] API Key present:', !!apiKey)
+    console.log('[blog/generate] API Key present:', !!process.env.ANTHROPIC_API_KEY)
+
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return NextResponse.json({ error: 'ANTHROPIC_API_KEY non configurée' }, { status: 500 })
+    }
 
     const { authorized, userId } = await verifyAdmin()
     if (!authorized) {
@@ -103,47 +60,44 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Données invalides' }, { status: 400 })
     }
 
-    if (!apiKey) {
-      return NextResponse.json({ error: 'ANTHROPIC_API_KEY non configurée' }, { status: 500 })
-    }
-
     const v = parsed.data
     const wordCount = LENGTH_MAP[v.length]
 
-    const prompt = `Article "${v.articleType}" — Sujet : ${v.subject}
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2048,
+      system: SYSTEM_PROMPT,
+      messages: [{
+        role: 'user',
+        content: `Article "${v.articleType}" — Sujet : ${v.subject}
 ${v.keyword ? `SEO : ${v.keyword}` : ''}
 Pays : ${v.country} | ~${wordCount} mots
 ${v.generateFaq ? 'Avec FAQ' : 'Sans FAQ'} | ${v.generateTable ? 'Avec tableau' : 'Sans tableau'}
-Réponds en JSON uniquement.`
+Réponds en JSON uniquement.`,
+      }],
+    })
 
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 55000)
+    const text = message.content[0].type === 'text' ? message.content[0].text : ''
 
-    let fullText: string
-    try {
-      fullText = await streamAnthropic(apiKey, SYSTEM_PROMPT, prompt, controller.signal)
-    } finally {
-      clearTimeout(timeout)
-    }
+    console.log('[blog/generate] Response length:', text.length)
+    console.log('[blog/generate] First 200:', text.substring(0, 200))
 
-    console.log('[blog/generate] Raw text length:', fullText.length)
-    console.log('[blog/generate] First 200 chars:', fullText.substring(0, 200))
-    console.log('[blog/generate] Last 200 chars:', fullText.substring(fullText.length - 200))
-
-    if (!fullText) {
+    if (!text) {
       return NextResponse.json({ error: 'Réponse IA vide. Réessayez.' }, { status: 500 })
     }
 
-    const result = extractJSON(fullText)
+    const result = extractJSON(text)
     if (!result) {
-      console.error('[blog/generate] Failed to parse. Text:', fullText.substring(0, 500))
-      return NextResponse.json({ error: 'JSON invalide. Réessayez.' }, { status: 500 })
+      console.error('[blog/generate] Failed to parse:', text.substring(0, 500))
+      return NextResponse.json({ error: 'JSON invalide. Réessayez.', debug: text.substring(0, 300) }, { status: 500 })
     }
 
     return NextResponse.json(result)
   } catch (err) {
+    console.error('[blog/generate] Error:', err)
     const msg = err instanceof Error ? err.message : 'Erreur serveur'
-    console.error('[blog/generate] Error:', msg)
     return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
