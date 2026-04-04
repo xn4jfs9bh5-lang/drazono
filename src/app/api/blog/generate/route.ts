@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { verifyAdmin } from '@/lib/api-auth'
 import { rateLimit } from '@/lib/rate-limit'
+import { extractJSON } from '@/lib/extract-json'
 
 export const maxDuration = 60
 
@@ -27,7 +28,9 @@ RÈGLES :
 - CTA WhatsApp DRAZONO à la fin
 - Mentionne : zéro intermédiaire, prix usine, support WhatsApp
 
-JSON UNIQUEMENT :
+IMPORTANT: Réponds UNIQUEMENT avec le JSON demandé. Pas de texte avant, pas de texte après, pas de backticks, pas de markdown. Juste le JSON brut.
+
+Format :
 {"title":"...","slug":"...","content":"markdown complet","meta_description":"155 chars max","keywords":["..."],"faq":[{"question":"...","answer":"..."}],"suggested_articles":["...","...","..."]}`
 
 const LENGTH_MAP = { short: '800', medium: '1500', long: '2500' }
@@ -123,21 +126,21 @@ Réponds en JSON uniquement.`
       clearTimeout(timeout)
     }
 
+    console.log('[blog/generate] Raw text length:', fullText.length)
+    console.log('[blog/generate] First 200 chars:', fullText.substring(0, 200))
+    console.log('[blog/generate] Last 200 chars:', fullText.substring(fullText.length - 200))
+
     if (!fullText) {
       return NextResponse.json({ error: 'Réponse IA vide. Réessayez.' }, { status: 500 })
     }
 
-    const jsonMatch = fullText.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) {
-      console.error('[blog/generate] No JSON in:', fullText.slice(0, 300))
-      return NextResponse.json({ error: 'Pas de JSON dans la réponse IA.' }, { status: 500 })
+    const result = extractJSON(fullText)
+    if (!result) {
+      console.error('[blog/generate] Failed to parse. Text:', fullText.substring(0, 500))
+      return NextResponse.json({ error: 'JSON invalide. Réessayez.' }, { status: 500 })
     }
 
-    try {
-      return NextResponse.json(JSON.parse(jsonMatch[0]))
-    } catch {
-      return NextResponse.json({ error: 'JSON invalide dans la réponse.' }, { status: 500 })
-    }
+    return NextResponse.json(result)
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Erreur serveur'
     console.error('[blog/generate] Error:', msg)

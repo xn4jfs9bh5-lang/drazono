@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { verifyAdmin } from '@/lib/api-auth'
 import { rateLimit } from '@/lib/rate-limit'
+import { extractJSON } from '@/lib/extract-json'
 
 export const maxDuration = 60
 
@@ -15,7 +16,9 @@ RÈGLES :
 - Prix en EUR et FCFA (1 EUR = 656 FCFA)
 - Thèmes : Lun=Deal, Mar=Éducation, Mer=Comparatif, Jeu=Coulisses, Ven=Témoignage, Sam=Engagement, Dim=Inspiration
 
-JSON UNIQUEMENT — 7 jours :
+IMPORTANT: Réponds UNIQUEMENT avec le JSON demandé. Pas de texte avant, pas de texte après, pas de backticks. Juste le JSON brut.
+
+Format 7 jours :
 {"days":[{"day":"Lundi","theme":"...","tiktok":{"script":"...","hook":"...","hashtags":"..."},"instagram":{"caption":"...","hashtags":"...","visual_suggestion":"..."},"facebook":{"text":"...","cta":"..."},"whatsapp_status":"..."}]}`
 
 async function streamAnthropic(apiKey: string, system: string, userPrompt: string, signal: AbortSignal): Promise<string> {
@@ -99,21 +102,21 @@ export async function POST() {
       clearTimeout(timeout)
     }
 
+    console.log('[social/calendar] Raw text length:', fullText.length)
+    console.log('[social/calendar] First 200 chars:', fullText.substring(0, 200))
+    console.log('[social/calendar] Last 200 chars:', fullText.substring(fullText.length - 200))
+
     if (!fullText) {
       return NextResponse.json({ error: 'Réponse IA vide.' }, { status: 500 })
     }
 
-    const jsonMatch = fullText.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) {
-      console.error('[social/calendar] No JSON in:', fullText.slice(0, 300))
-      return NextResponse.json({ error: 'Pas de JSON dans la réponse.' }, { status: 500 })
+    const result = extractJSON(fullText)
+    if (!result) {
+      console.error('[social/calendar] Failed to parse. Text:', fullText.substring(0, 500))
+      return NextResponse.json({ error: 'JSON invalide. Réessayez.' }, { status: 500 })
     }
 
-    try {
-      return NextResponse.json(JSON.parse(jsonMatch[0]))
-    } catch {
-      return NextResponse.json({ error: 'JSON invalide.' }, { status: 500 })
-    }
+    return NextResponse.json(result)
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Erreur serveur'
     console.error('[social/calendar] Error:', msg)
