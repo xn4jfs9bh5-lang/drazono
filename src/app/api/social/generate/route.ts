@@ -15,10 +15,9 @@ const schema = z.object({
 })
 
 export async function POST(req: Request) {
-  const { authorized } = await verifyAdmin()
-  if (!authorized) return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
-
   try {
+    const { authorized } = await verifyAdmin()
+    if (!authorized) return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
     const body = await req.json()
     const parsed = schema.safeParse(body)
     if (!parsed.success) return NextResponse.json({ error: 'Données invalides' }, { status: 400 })

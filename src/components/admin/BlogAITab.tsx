@@ -167,17 +167,17 @@ function GenerateView() {
       clearInterval(interval)
       setProgress(100)
 
-      if (!res.ok) {
-        const err = await res.json()
-        toast.error(err.error || 'Erreur de génération')
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok || !data) {
+        toast.error(data?.error || `Erreur ${res.status}. Réessayez.`)
         setGenerating(false)
         setProgress(0)
         return
       }
 
-      const data = await res.json()
       setArticle(data)
-      setEditContent(data.content)
+      setEditContent(data.content || '')
       toast.success('Article généré !')
     } catch (err) {
       clearInterval(interval)

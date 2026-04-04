@@ -123,13 +123,13 @@ function CalendarView() {
     setGenerating(true)
     try {
       const res = await fetch('/api/social/calendar', { method: 'POST' })
-      if (!res.ok) {
-        const err = await res.json()
-        toast.error(err.error || 'Erreur de génération')
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok || !data) {
+        toast.error(data?.error || `Erreur ${res.status}. Réessayez.`)
         setGenerating(false)
         return
       }
-      const data = await res.json()
       setDays(data.days ?? [])
 
       // Save to Supabase
@@ -297,14 +297,13 @@ function VehiclePostView() {
         }),
       })
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'Erreur réseau' }))
-        toast.error(err.error || 'Erreur de génération')
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok || !data) {
+        toast.error(data?.error || `Erreur ${res.status}. Réessayez.`)
         setGenerating(false)
         return
       }
-
-      const data = await res.json()
       setPosts(data)
       toast.success(data.source === 'cache' ? 'Posts chargés depuis le cache' : 'Posts générés !')
     } catch {
