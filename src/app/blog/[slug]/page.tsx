@@ -4,7 +4,11 @@ import Link from 'next/link'
 import { Clock, ChevronLeft, Share2 } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
 import { BLOG_POSTS } from '@/lib/blog-data'
+import { createAdminClient } from '@/lib/supabase-server'
 import RelatedVehicles from '@/components/vehicles/RelatedVehicles'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 function readingTime(content: string): number {
   const words = content.split(/\s+/).length
@@ -22,12 +26,35 @@ function renderMarkdown(content: string): string {
     .replace(/$/, '</p>')
 }
 
-export function generateStaticParams() {
-  return BLOG_POSTS.filter(p => p.published).map(p => ({ slug: p.slug }))
+interface BlogPost {
+  id: string
+  slug: string
+  title: string
+  content: string
+  cover_image?: string
+  published: boolean
+  created_at: string
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const post = BLOG_POSTS.find(p => p.slug === params.slug)
+async function getPost(slug: string): Promise<BlogPost | null> {
+  // Try Supabase first
+  const supabase = createAdminClient()
+  const { data } = await supabase
+    .from('blog_posts')
+    .select('*')
+    .eq('slug', slug)
+    .eq('published', true)
+    .maybeSingle()
+
+  if (data) return data
+
+  // Fallback to static posts
+  const staticPost = BLOG_POSTS.find(p => p.slug === slug && p.published)
+  return staticPost ?? null
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const post = await getPost(params.slug)
   if (!post) return { title: 'Article introuvable — DRAZONO' }
   return {
     title: `${post.title} — DRAZONO`,
@@ -35,8 +62,8 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   }
 }
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
-  const post = BLOG_POSTS.find(p => p.slug === params.slug && p.published)
+export default async function BlogPostPage({ params }: { params: { slug: string } }) {
+  const post = await getPost(params.slug)
 
   if (!post) {
     notFound()
@@ -54,9 +81,16 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 
         {/* Hero image */}
         <FadeIn>
-          <div className="w-full h-48 sm:h-64 bg-gradient-to-br from-[#1845CC]/10 to-[#1845CC]/5 rounded-2xl mb-8 flex items-center justify-center">
-            <span className="text-gray-400 text-sm">Image de couverture</span>
-          </div>
+          {post.cover_image ? (
+            <div className="w-full h-48 sm:h-64 rounded-2xl mb-8 overflow-hidden bg-gray-100">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <div className="w-full h-48 sm:h-64 bg-gradient-to-br from-brand-500/10 to-brand-500/5 rounded-2xl mb-8 flex items-center justify-center">
+              <span className="text-gray-400 text-sm">DRAZONO</span>
+            </div>
+          )}
         </FadeIn>
 
         <FadeIn delay={0.1}>
