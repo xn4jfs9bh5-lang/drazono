@@ -33,32 +33,11 @@ FORMAT JSON UNIQUEMENT :
 
 Génère exactement 7 jours (Lundi à Dimanche). Réponds UNIQUEMENT avec le JSON valide.`
 
-async function callAnthropic(apiKey: string, attempt = 0): Promise<Response> {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 8192,
-      messages: [{ role: 'user', content: 'Génère un planning social media complet pour la semaine de DRAZONO. Inclus des véhicules populaires chinois (BYD, Chery, Haval, MG, Geely) avec des prix réalistes. Le site est www.drazono.com.' }],
-      system: SYSTEM_PROMPT,
-    }),
-  })
-
-  if (!response.ok && attempt < 1) {
-    await new Promise(r => setTimeout(r, 2000))
-    return callAnthropic(apiKey, attempt + 1)
-  }
-
-  return response
-}
-
 export async function POST() {
   try {
+    const apiKey = process.env.ANTHROPIC_API_KEY
+    console.log('[social/calendar] API Key present:', !!apiKey)
+
     const { authorized, userId } = await verifyAdmin()
     if (!authorized) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
@@ -69,29 +48,78 @@ export async function POST() {
       return NextResponse.json({ error: 'Limite atteinte (3/heure).' }, { status: 429 })
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY
     if (!apiKey) {
-      return NextResponse.json({ error: 'ANTHROPIC_API_KEY non configurée' }, { status: 500 })
+      return NextResponse.json({ error: 'ANTHROPIC_API_KEY non configurée dans les variables d\'environnement Vercel' }, { status: 500 })
     }
 
-    const response = await callAnthropic(apiKey)
+    const requestBody = {
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8192,
+      messages: [{ role: 'user', content: 'Génère un planning social media complet pour la semaine de DRAZONO. Inclus des véhicules populaires chinois (BYD, Chery, Haval, MG, Geely) avec des prix réalistes. Le site est www.drazono.com.' }],
+      system: SYSTEM_PROMPT,
+    }
+
+    // Attempt 1
+    let response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify(requestBody),
+    })
+
+    // Retry once on failure
+    if (!response.ok) {
+      console.log('[social/calendar] Attempt 1 failed:', response.status)
+      await new Promise(r => setTimeout(r, 2000))
+      response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify(requestBody),
+      })
+    }
 
     if (!response.ok) {
-      const errText = await response.text()
-      return NextResponse.json({ error: `Erreur API (${response.status}): ${errText.slice(0, 200)}` }, { status: 502 })
+      const errBody = await response.text().catch(() => 'No response body')
+      console.error('[social/calendar] Anthropic error:', response.status, errBody)
+      return NextResponse.json({
+        error: `Erreur API Anthropic (${response.status}). Vérifiez votre clé API.`,
+        details: errBody.slice(0, 300),
+      }, { status: 502 })
     }
 
     const aiResponse = await response.json()
-    const text = aiResponse.content?.[0]?.text || '{}'
+    const text = aiResponse.content?.[0]?.text
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) {
-      return NextResponse.json({ error: 'Réponse IA invalide — pas de JSON' }, { status: 500 })
+    if (!text) {
+      console.error('[social/calendar] No text in response:', JSON.stringify(aiResponse).slice(0, 500))
+      return NextResponse.json({ error: 'La réponse de l\'IA est vide. Réessayez.' }, { status: 500 })
     }
 
-    const content = JSON.parse(jsonMatch[0])
-    return NextResponse.json(content)
+    // Find JSON in the response
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) {
+      console.error('[social/calendar] No JSON found in:', text.slice(0, 500))
+      return NextResponse.json({ error: 'L\'IA n\'a pas retourné de JSON valide. Réessayez.' }, { status: 500 })
+    }
+
+    try {
+      const content = JSON.parse(jsonMatch[0])
+      return NextResponse.json(content)
+    } catch (parseErr) {
+      console.error('[social/calendar] JSON parse error:', parseErr)
+      return NextResponse.json({ error: 'Erreur de parsing JSON. Réessayez.' }, { status: 500 })
+    }
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Erreur serveur' }, { status: 500 })
+    console.error('[social/calendar] Unexpected error:', err)
+    return NextResponse.json({
+      error: err instanceof Error ? err.message : 'Erreur serveur inattendue',
+    }, { status: 500 })
   }
 }

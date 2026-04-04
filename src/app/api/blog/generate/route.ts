@@ -48,32 +48,11 @@ Réponds UNIQUEMENT avec le JSON valide, sans aucun texte autour.`
 
 const LENGTH_MAP = { short: '800', medium: '1500', long: '2500' }
 
-async function callAnthropic(apiKey: string, prompt: string, attempt = 0): Promise<Response> {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      messages: [{ role: 'user', content: prompt }],
-      system: SYSTEM_PROMPT,
-    }),
-  })
-
-  if (!response.ok && attempt < 1) {
-    await new Promise(r => setTimeout(r, 2000))
-    return callAnthropic(apiKey, prompt, attempt + 1)
-  }
-
-  return response
-}
-
 export async function POST(req: Request) {
   try {
+    const apiKey = process.env.ANTHROPIC_API_KEY
+    console.log('[blog/generate] API Key present:', !!apiKey)
+
     const { authorized, userId } = await verifyAdmin()
     if (!authorized) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
@@ -87,12 +66,11 @@ export async function POST(req: Request) {
     const body = await req.json()
     const parsed = schema.safeParse(body)
     if (!parsed.success) {
-      return NextResponse.json({ error: 'Données invalides' }, { status: 400 })
+      return NextResponse.json({ error: 'Données invalides: ' + parsed.error.message }, { status: 400 })
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY
     if (!apiKey) {
-      return NextResponse.json({ error: 'ANTHROPIC_API_KEY non configurée' }, { status: 500 })
+      return NextResponse.json({ error: 'ANTHROPIC_API_KEY non configurée dans les variables d\'environnement Vercel' }, { status: 500 })
     }
 
     const v = parsed.data
@@ -109,24 +87,77 @@ ${v.generateTable ? 'Inclure au moins un tableau comparatif détaillé' : ''}
 
 Génère l'article complet au format JSON comme spécifié.`
 
-    const response = await callAnthropic(apiKey, prompt)
+    // Attempt 1
+    let response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        messages: [{ role: 'user', content: prompt }],
+        system: SYSTEM_PROMPT,
+      }),
+    })
+
+    // Retry once on failure
+    if (!response.ok) {
+      console.log('[blog/generate] Attempt 1 failed:', response.status)
+      await new Promise(r => setTimeout(r, 2000))
+      response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 4096,
+          messages: [{ role: 'user', content: prompt }],
+          system: SYSTEM_PROMPT,
+        }),
+      })
+    }
 
     if (!response.ok) {
-      const errText = await response.text()
-      return NextResponse.json({ error: `Erreur API Anthropic (${response.status}): ${errText.slice(0, 200)}` }, { status: 502 })
+      const errBody = await response.text().catch(() => 'No response body')
+      console.error('[blog/generate] Anthropic error:', response.status, errBody)
+      return NextResponse.json({
+        error: `Erreur API Anthropic (${response.status}). Vérifiez votre clé API et réessayez.`,
+        details: errBody.slice(0, 300),
+      }, { status: 502 })
     }
 
     const aiResponse = await response.json()
-    const text = aiResponse.content?.[0]?.text || '{}'
+    const text = aiResponse.content?.[0]?.text
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) {
-      return NextResponse.json({ error: 'Réponse IA invalide — pas de JSON détecté' }, { status: 500 })
+    if (!text) {
+      console.error('[blog/generate] No text in response:', JSON.stringify(aiResponse).slice(0, 500))
+      return NextResponse.json({ error: 'La réponse de l\'IA est vide. Réessayez.' }, { status: 500 })
     }
 
-    const content = JSON.parse(jsonMatch[0])
-    return NextResponse.json(content)
+    // Find JSON in the response
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) {
+      console.error('[blog/generate] No JSON found in:', text.slice(0, 500))
+      return NextResponse.json({ error: 'L\'IA n\'a pas retourné de JSON valide. Réessayez.' }, { status: 500 })
+    }
+
+    try {
+      const content = JSON.parse(jsonMatch[0])
+      return NextResponse.json(content)
+    } catch (parseErr) {
+      console.error('[blog/generate] JSON parse error:', parseErr)
+      return NextResponse.json({ error: 'Erreur de parsing JSON. Réessayez.' }, { status: 500 })
+    }
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Erreur serveur inattendue' }, { status: 500 })
+    console.error('[blog/generate] Unexpected error:', err)
+    return NextResponse.json({
+      error: err instanceof Error ? err.message : 'Erreur serveur inattendue',
+    }, { status: 500 })
   }
 }
