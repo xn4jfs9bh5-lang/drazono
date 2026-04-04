@@ -5,12 +5,13 @@ import {
   LayoutDashboard, Car, Users, MessageSquare, Bell, Plus,
   Eye, Heart, TrendingUp, Trash2, Edit3, Search, X, Upload,
   CheckCircle, AlertTriangle, Loader2, ChevronDown, Image as ImageIcon,
-  Filter, RefreshCw, BarChart3, LogOut, FileText
+  Filter, RefreshCw, BarChart3, LogOut, FileText, Share2
 } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
 import AnalyticsTab from '@/components/admin/AnalyticsTab'
 import MarketingTab from '@/components/admin/MarketingTab'
 import BlogAITab from '@/components/admin/BlogAITab'
+import SocialAITab from '@/components/admin/SocialAITab'
 import SocialGeneratorModal from '@/components/admin/SocialGeneratorModal'
 import { BRANDS, BODY_TYPES, FUEL_TYPES, TRANSMISSIONS, EUR_TO_FCFA } from '@/lib/constants'
 import { supabase } from '@/lib/supabase'
@@ -21,7 +22,7 @@ import { toast } from 'sonner'
 // Types
 // ---------------------------------------------------------------------------
 
-type Tab = 'dashboard' | 'vehicles' | 'add-vehicle' | 'edit-vehicle' | 'clients' | 'requests' | 'alerts' | 'analytics' | 'marketing' | 'blog'
+type Tab = 'dashboard' | 'vehicles' | 'add-vehicle' | 'edit-vehicle' | 'clients' | 'requests' | 'alerts' | 'analytics' | 'marketing' | 'blog' | 'social'
 
 interface DashboardStats {
   total: number
@@ -65,6 +66,7 @@ const adminTabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   { id: 'marketing', label: 'Marketing', icon: TrendingUp },
   { id: 'blog', label: 'Blog IA', icon: FileText },
+  { id: 'social', label: 'Social IA', icon: Share2 },
 ]
 
 const STATUS_OPTIONS: { value: Vehicle['status']; label: string; color: string }[] = [
@@ -1012,6 +1014,7 @@ export default function AdminPage() {
             {activeTab === 'analytics' && <AnalyticsTab />}
             {activeTab === 'marketing' && <MarketingTab />}
             {activeTab === 'blog' && <BlogAITab />}
+            {activeTab === 'social' && <SocialAITab />}
           </div>
         </div>
       </div>
