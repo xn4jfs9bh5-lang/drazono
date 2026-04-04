@@ -9,9 +9,9 @@ import AttributionCapture from '@/components/layout/AttributionCapture'
 
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const isAdminLogin = pathname === '/admin/login'
+  const isBare = pathname === '/admin/login' || pathname === '/reset-password'
 
-  if (isAdminLogin) {
+  if (isBare) {
     return <main className="min-h-screen">{children}</main>
   }
 

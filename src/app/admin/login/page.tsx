@@ -9,6 +9,20 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [resetSent, setResetSent] = useState(false)
+
+  const handleForgotPassword = async () => {
+    if (!email) { setError('Entrez votre email d\'abord.'); return }
+    setError('')
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+    if (resetError) {
+      setError(resetError.message)
+    } else {
+      setResetSent(true)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -73,6 +87,11 @@ export default function AdminLoginPage() {
               {error}
             </div>
           )}
+          {resetSent && (
+            <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-sm text-emerald-400">
+              Un email de réinitialisation a été envoyé.
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -97,6 +116,12 @@ export default function AdminLoginPage() {
                 className="w-full h-10 rounded-lg border border-slate-600 bg-slate-800/50 px-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1845CC] focus:border-transparent"
                 placeholder="••••••••"
               />
+            </div>
+
+            <div className="text-right">
+              <button type="button" onClick={handleForgotPassword} className="text-xs text-slate-400 hover:text-white transition-colors">
+                Mot de passe oublié ?
+              </button>
             </div>
 
             <button

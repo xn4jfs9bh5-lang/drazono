@@ -81,12 +81,12 @@ function LoginForm() {
     }
     setError('')
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/login`,
+      redirectTo: `${window.location.origin}/reset-password`,
     })
     if (error) {
       setError(translateError(error.message))
     } else {
-      setMessage('Email de réinitialisation envoyé ! Vérifiez votre boîte mail.')
+      setMessage('Un email de réinitialisation a été envoyé. Vérifiez votre boîte mail.')
     }
   }
 
