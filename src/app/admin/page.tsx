@@ -5,11 +5,12 @@ import {
   LayoutDashboard, Car, Users, MessageSquare, Bell, Plus,
   Eye, Heart, TrendingUp, Trash2, Edit3, Search, X, Upload,
   CheckCircle, AlertTriangle, Loader2, ChevronDown, Image as ImageIcon,
-  Filter, RefreshCw, BarChart3, LogOut
+  Filter, RefreshCw, BarChart3, LogOut, FileText
 } from 'lucide-react'
 import FadeIn from '@/components/motion/FadeIn'
 import AnalyticsTab from '@/components/admin/AnalyticsTab'
 import MarketingTab from '@/components/admin/MarketingTab'
+import BlogAITab from '@/components/admin/BlogAITab'
 import SocialGeneratorModal from '@/components/admin/SocialGeneratorModal'
 import { BRANDS, BODY_TYPES, FUEL_TYPES, TRANSMISSIONS, EUR_TO_FCFA } from '@/lib/constants'
 import { supabase } from '@/lib/supabase'
@@ -20,7 +21,7 @@ import { toast } from 'sonner'
 // Types
 // ---------------------------------------------------------------------------
 
-type Tab = 'dashboard' | 'vehicles' | 'add-vehicle' | 'edit-vehicle' | 'clients' | 'requests' | 'alerts' | 'analytics' | 'marketing'
+type Tab = 'dashboard' | 'vehicles' | 'add-vehicle' | 'edit-vehicle' | 'clients' | 'requests' | 'alerts' | 'analytics' | 'marketing' | 'blog'
 
 interface DashboardStats {
   total: number
@@ -63,6 +64,7 @@ const adminTabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'alerts', label: 'Alertes', icon: Bell },
   { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   { id: 'marketing', label: 'Marketing', icon: TrendingUp },
+  { id: 'blog', label: 'Blog IA', icon: FileText },
 ]
 
 const STATUS_OPTIONS: { value: Vehicle['status']; label: string; color: string }[] = [
@@ -1009,6 +1011,7 @@ export default function AdminPage() {
             {/* ==================== ANALYTICS ==================== */}
             {activeTab === 'analytics' && <AnalyticsTab />}
             {activeTab === 'marketing' && <MarketingTab />}
+            {activeTab === 'blog' && <BlogAITab />}
           </div>
         </div>
       </div>
