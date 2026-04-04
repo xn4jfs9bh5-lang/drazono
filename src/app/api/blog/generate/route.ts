@@ -15,38 +15,69 @@ const schema = z.object({
   generateTable: z.boolean(),
 })
 
-const SYSTEM_PROMPT = `Tu es un expert en rédaction SEO spécialisé dans l'automobile et l'import de véhicules chinois pour l'Afrique de l'Ouest. Tu rédiges en français courant, naturel, jamais robotique. Ton ton est celui d'un conseiller de confiance qui connaît les réalités du terrain africain.
+const SYSTEM_PROMPT = `Expert SEO automobile, import véhicules chinois pour l'Afrique de l'Ouest. Rédige pour DRAZONO (www.drazono.com), import direct sans intermédiaire.
 
-Tu écris pour DRAZONO (www.drazono.com), plateforme d'import direct de véhicules chinois (BYD, Chery, Geely, Haval, MG, NIO, Xpeng) sans intermédiaire. Support WhatsApp, livraison mondiale.
+RÈGLES :
+- Commence par une histoire ou fait choc, jamais "Dans cet article"
+- Prénoms africains (Moussa, Fatou, Kofi, Awa)
+- Prix en EUR ET FCFA (1 EUR = 656 FCFA)
+- Paragraphes courts (4-5 lignes max)
+- Tableau comparatif obligatoire
+- FAQ 5 questions minimum
+- CTA WhatsApp DRAZONO à la fin
+- Mentionne : zéro intermédiaire, prix usine, support WhatsApp
 
-RÈGLES OBLIGATOIRES :
-- Commence TOUJOURS par une histoire ou un fait choc, jamais par "Dans cet article"
-- Utilise des prénoms africains dans les exemples (Moussa, Fatou, Kofi, Awa)
-- Prix TOUJOURS en EUR ET en FCFA (1 EUR = 656 FCFA)
-- Compare avec les prix européens/japonais pour montrer l'économie
-- Paragraphes courts : max 4-5 lignes
-- Au moins un tableau comparatif par article
-- Inclus une section FAQ de 5 questions minimum
-- Termine TOUJOURS par un CTA WhatsApp DRAZONO
-- Sous-titres H2/H3 actionnables et spécifiques
-- Mentionne l'avantage DRAZONO naturellement (zéro intermédiaire, prix usine, support WhatsApp)
-- Adresse les objections (fiabilité, pièces détachées, garantie)
-- Ajoute une section "Ce que les gens demandent sur WhatsApp" avec 3 vraies questions
-
-FORMAT DE SORTIE JSON UNIQUEMENT :
-{
-  "title": "titre SEO 60 caractères max",
-  "slug": "slug-url-optimise",
-  "content": "contenu markdown complet avec H1 H2 H3 tableaux listes",
-  "meta_description": "description SEO 155 caractères max",
-  "keywords": ["mot-cle-1", "mot-cle-2"],
-  "faq": [{"question": "...", "answer": "..."}],
-  "suggested_articles": ["Titre article lié 1", "Titre article lié 2", "Titre article lié 3"]
-}
-
-Réponds UNIQUEMENT avec le JSON valide, sans aucun texte autour.`
+JSON UNIQUEMENT :
+{"title":"...","slug":"...","content":"markdown complet","meta_description":"155 chars max","keywords":["..."],"faq":[{"question":"...","answer":"..."}],"suggested_articles":["...","...","..."]}`
 
 const LENGTH_MAP = { short: '800', medium: '1500', long: '2500' }
+
+async function streamAnthropic(apiKey: string, system: string, userPrompt: string, signal: AbortSignal): Promise<string> {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2048,
+      stream: true,
+      system,
+      messages: [{ role: 'user', content: userPrompt }],
+    }),
+    signal,
+  })
+
+  if (!response.ok) {
+    const errBody = await response.text().catch(() => '')
+    throw new Error(`Anthropic ${response.status}: ${errBody.slice(0, 200)}`)
+  }
+
+  const reader = response.body!.getReader()
+  const decoder = new TextDecoder()
+  let fullText = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    const chunk = decoder.decode(value)
+    for (const line of chunk.split('\n')) {
+      if (!line.startsWith('data: ')) continue
+      const data = line.slice(6)
+      if (data === '[DONE]') continue
+      try {
+        const parsed = JSON.parse(data)
+        if (parsed.type === 'content_block_delta') {
+          fullText += parsed.delta?.text || ''
+        }
+      } catch { /* skip malformed SSE lines */ }
+    }
+  }
+
+  return fullText
+}
 
 export async function POST(req: Request) {
   try {
@@ -60,104 +91,56 @@ export async function POST(req: Request) {
 
     const rl = rateLimit(`blog:${userId}`, 5, 3600_000)
     if (!rl.ok) {
-      return NextResponse.json({ error: 'Limite atteinte (5/heure). Réessayez plus tard.' }, { status: 429 })
+      return NextResponse.json({ error: 'Limite atteinte (5/heure).' }, { status: 429 })
     }
 
     const body = await req.json()
     const parsed = schema.safeParse(body)
     if (!parsed.success) {
-      return NextResponse.json({ error: 'Données invalides: ' + parsed.error.message }, { status: 400 })
+      return NextResponse.json({ error: 'Données invalides' }, { status: 400 })
     }
 
     if (!apiKey) {
-      return NextResponse.json({ error: 'ANTHROPIC_API_KEY non configurée dans les variables d\'environnement Vercel' }, { status: 500 })
+      return NextResponse.json({ error: 'ANTHROPIC_API_KEY non configurée' }, { status: 500 })
     }
 
     const v = parsed.data
     const wordCount = LENGTH_MAP[v.length]
 
-    const prompt = `Rédige un article de type "${v.articleType}" sur le sujet suivant :
+    const prompt = `Article "${v.articleType}" — Sujet : ${v.subject}
+${v.keyword ? `SEO : ${v.keyword}` : ''}
+Pays : ${v.country} | ~${wordCount} mots
+${v.generateFaq ? 'Avec FAQ' : 'Sans FAQ'} | ${v.generateTable ? 'Avec tableau' : 'Sans tableau'}
+Réponds en JSON uniquement.`
 
-Sujet : ${v.subject}
-${v.keyword ? `Mot-clé principal SEO : ${v.keyword}` : ''}
-Pays cible : ${v.country}
-Longueur cible : environ ${wordCount} mots
-${v.generateFaq ? 'Inclure une FAQ de 5-7 questions' : 'Pas de FAQ'}
-${v.generateTable ? 'Inclure au moins un tableau comparatif détaillé' : ''}
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 55000)
 
-Génère l'article complet au format JSON comme spécifié.`
-
-    // Attempt 1
-    let response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
-        messages: [{ role: 'user', content: prompt }],
-        system: SYSTEM_PROMPT,
-      }),
-    })
-
-    // Retry once on failure
-    if (!response.ok) {
-      console.log('[blog/generate] Attempt 1 failed:', response.status)
-      await new Promise(r => setTimeout(r, 2000))
-      response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 4096,
-          messages: [{ role: 'user', content: prompt }],
-          system: SYSTEM_PROMPT,
-        }),
-      })
+    let fullText: string
+    try {
+      fullText = await streamAnthropic(apiKey, SYSTEM_PROMPT, prompt, controller.signal)
+    } finally {
+      clearTimeout(timeout)
     }
 
-    if (!response.ok) {
-      const errBody = await response.text().catch(() => 'No response body')
-      console.error('[blog/generate] Anthropic error:', response.status, errBody)
-      return NextResponse.json({
-        error: `Erreur API Anthropic (${response.status}). Vérifiez votre clé API et réessayez.`,
-        details: errBody.slice(0, 300),
-      }, { status: 502 })
+    if (!fullText) {
+      return NextResponse.json({ error: 'Réponse IA vide. Réessayez.' }, { status: 500 })
     }
 
-    const aiResponse = await response.json()
-    const text = aiResponse.content?.[0]?.text
-
-    if (!text) {
-      console.error('[blog/generate] No text in response:', JSON.stringify(aiResponse).slice(0, 500))
-      return NextResponse.json({ error: 'La réponse de l\'IA est vide. Réessayez.' }, { status: 500 })
-    }
-
-    // Find JSON in the response
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    const jsonMatch = fullText.match(/\{[\s\S]*\}/)
     if (!jsonMatch) {
-      console.error('[blog/generate] No JSON found in:', text.slice(0, 500))
-      return NextResponse.json({ error: 'L\'IA n\'a pas retourné de JSON valide. Réessayez.' }, { status: 500 })
+      console.error('[blog/generate] No JSON in:', fullText.slice(0, 300))
+      return NextResponse.json({ error: 'Pas de JSON dans la réponse IA.' }, { status: 500 })
     }
 
     try {
-      const content = JSON.parse(jsonMatch[0])
-      return NextResponse.json(content)
-    } catch (parseErr) {
-      console.error('[blog/generate] JSON parse error:', parseErr)
-      return NextResponse.json({ error: 'Erreur de parsing JSON. Réessayez.' }, { status: 500 })
+      return NextResponse.json(JSON.parse(jsonMatch[0]))
+    } catch {
+      return NextResponse.json({ error: 'JSON invalide dans la réponse.' }, { status: 500 })
     }
   } catch (err) {
-    console.error('[blog/generate] Unexpected error:', err)
-    return NextResponse.json({
-      error: err instanceof Error ? err.message : 'Erreur serveur inattendue',
-    }, { status: 500 })
+    const msg = err instanceof Error ? err.message : 'Erreur serveur'
+    console.error('[blog/generate] Error:', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
