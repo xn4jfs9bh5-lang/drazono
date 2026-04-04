@@ -1,10 +1,12 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { verifyAdmin } from '@/lib/api-auth'
 import { createAdminClient } from '@/lib/supabase-server'
 
 export const maxDuration = 60
+export const dynamic = 'force-dynamic'
+
+const client = new Anthropic()
 
 const schema = z.object({
   brand: z.string(), model: z.string(), year: z.number(),
@@ -14,10 +16,8 @@ const schema = z.object({
   vehicleId: z.string().uuid().optional(),
 })
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { authorized } = await verifyAdmin()
-    if (!authorized) return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
     const body = await req.json()
     const parsed = schema.safeParse(body)
     if (!parsed.success) return NextResponse.json({ error: 'Données invalides' }, { status: 400 })
@@ -41,19 +41,24 @@ export async function POST(req: Request) {
       })
     }
 
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-    const msg = await client.messages.create({
+    let fullText = ''
+    const stream = client.messages.stream({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
       system: `Marketing automobile Afrique. Contenu viral. Tu dois répondre UNIQUEMENT avec un objet JSON valide. Pas de backticks, pas de texte avant ou après. Commence par { et termine par }.`,
-      messages: [{ role: 'user', content: `Posts pour: ${v.brand} ${v.model} ${v.year}, ${fmt(v.price_eur)}€ / ${fmt(v.price_fcfa)} FCFA, ${v.condition}, ${v.fuel_type}. Lien: ${v.url}. JSON: {"tiktok":"...","facebook":"...","instagram":"...","whatsapp":"..."}. Hashtags #drazono #voiturechinoise.` }],
+      messages: [{
+        role: 'user',
+        content: `Posts pour: ${v.brand} ${v.model} ${v.year}, ${fmt(v.price_eur)}€ / ${fmt(v.price_fcfa)} FCFA, ${v.condition}, ${v.fuel_type}. Lien: ${v.url}. JSON: {"tiktok":"...","facebook":"...","instagram":"...","whatsapp":"..."}. Hashtags #drazono #voiturechinoise.`,
+      }],
     })
 
-    const text = msg.content[0].type === 'text' ? msg.content[0].text : ''
+    stream.on('text', (text) => { fullText += text })
+    await stream.finalMessage()
+
     let content
-    try { content = JSON.parse(text) } catch {
-      const m = text.match(/\{[\s\S]*\}/)
-      if (m) try { content = JSON.parse(m[0]) } catch { /* fall through */ }
+    try { content = JSON.parse(fullText) } catch {
+      const m = fullText.match(/\{[\s\S]*\}/)
+      if (m) try { content = JSON.parse(m[0]) } catch { /* */ }
     }
 
     if (!content) {
@@ -66,14 +71,16 @@ export async function POST(req: Request) {
       })
     }
 
+    // Cache
     if (v.vehicleId) {
       const sb = createAdminClient()
       await sb.from('vehicles').update({ social_posts_cache: content }).eq('id', v.vehicleId)
     }
 
     return NextResponse.json({ ...content, source: 'ai' })
-  } catch (e) {
-    console.error('[social/generate]', e)
-    return NextResponse.json({ error: e instanceof Error ? e.message : 'Erreur' }, { status: 500 })
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Erreur serveur'
+    console.error('[social/generate] error:', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

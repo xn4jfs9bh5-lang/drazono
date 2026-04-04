@@ -121,8 +121,12 @@ function CalendarView() {
 
   async function generateWeek() {
     setGenerating(true)
+    const controller = new AbortController()
+    const fetchTimeout = setTimeout(() => controller.abort(), 90000)
+
     try {
-      const res = await fetch('/api/social/calendar', { method: 'POST' })
+      const res = await fetch('/api/social/calendar', { method: 'POST', signal: controller.signal })
+      clearTimeout(fetchTimeout)
       const data = await res.json().catch(() => null)
 
       if (!res.ok || !data) {
@@ -144,8 +148,9 @@ function CalendarView() {
       )
 
       toast.success('Planning généré et sauvegardé !')
-    } catch {
-      toast.error('Erreur réseau')
+    } catch (err) {
+      clearTimeout(fetchTimeout)
+      toast.error(err instanceof Error && err.name === 'AbortError' ? 'Timeout — réessayez.' : 'Erreur réseau')
     }
     setGenerating(false)
   }
@@ -278,6 +283,9 @@ function VehiclePostView() {
     setGenerating(true)
     setPosts(null)
 
+    const controller = new AbortController()
+    const fetchTimeout = setTimeout(() => controller.abort(), 90000)
+
     try {
       const res = await fetch('/api/social/generate', {
         method: 'POST',
@@ -295,8 +303,10 @@ function VehiclePostView() {
           url: `https://www.drazono.com/vehicule/${selected.id}`,
           vehicleId: selected.id,
         }),
+        signal: controller.signal,
       })
 
+      clearTimeout(fetchTimeout)
       const data = await res.json().catch(() => null)
 
       if (!res.ok || !data) {
@@ -306,8 +316,9 @@ function VehiclePostView() {
       }
       setPosts(data)
       toast.success(data.source === 'cache' ? 'Posts chargés depuis le cache' : 'Posts générés !')
-    } catch {
-      toast.error('Erreur réseau')
+    } catch (err) {
+      clearTimeout(fetchTimeout)
+      toast.error(err instanceof Error && err.name === 'AbortError' ? 'Timeout — réessayez.' : 'Erreur réseau')
     }
     setGenerating(false)
   }

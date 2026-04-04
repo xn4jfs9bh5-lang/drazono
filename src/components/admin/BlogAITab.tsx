@@ -157,13 +157,18 @@ function GenerateView() {
       setProgress(p => Math.min(p + Math.random() * 8, 90))
     }, 500)
 
+    const controller = new AbortController()
+    const fetchTimeout = setTimeout(() => controller.abort(), 90000)
+
     try {
       const res = await fetch('/api/blog/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ articleType, subject, keyword, country, length, generateFaq, generateTable }),
+        signal: controller.signal,
       })
 
+      clearTimeout(fetchTimeout)
       clearInterval(interval)
       setProgress(100)
 
@@ -180,8 +185,9 @@ function GenerateView() {
       setEditContent(data.content || '')
       toast.success('Article généré !')
     } catch (err) {
+      clearTimeout(fetchTimeout)
       clearInterval(interval)
-      toast.error(err instanceof Error ? err.message : 'Erreur réseau')
+      toast.error(err instanceof Error && err.name === 'AbortError' ? 'Timeout — réessayez.' : (err instanceof Error ? err.message : 'Erreur réseau'))
     }
     setGenerating(false)
     setTimeout(() => setProgress(0), 500)
