@@ -54,6 +54,8 @@ const EMPTY_FORM = {
   featured: false,
   status: 'brouillon' as Vehicle['status'],
   video_url: '',
+  price_type: 'fob' as 'fob' | 'cif',
+  destination_country: '',
 }
 
 const adminTabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
@@ -318,6 +320,8 @@ export default function AdminPage() {
         featured: form.featured,
         status: form.status,
         video_url: form.video_url.trim() || null,
+        price_type: form.price_type,
+        destination_country: form.price_type === 'cif' ? form.destination_country.trim() || null : null,
       }
 
       if (editingId) {
@@ -451,6 +455,8 @@ export default function AdminPage() {
       featured: vehicle.featured,
       status: vehicle.status,
       video_url: vehicle.video_url ?? '',
+      price_type: (vehicle.price_type as 'fob' | 'cif') || 'fob',
+      destination_country: vehicle.destination_country ?? '',
     })
     setExistingImages(vehicle.images ?? [])
     setPhotos([])
@@ -759,6 +765,21 @@ export default function AdminPage() {
                         <p className="text-xs text-gray-400 mt-1">{formatPrice(Math.round(form.price_eur * EUR_TO_FCFA))} FCFA</p>
                       )}
                     </div>
+                    {/* Price type */}
+                    <div>
+                      <label className={labelClass}>Type de prix</label>
+                      <select value={form.price_type} onChange={e => setForm(f => ({ ...f, price_type: e.target.value as 'fob' | 'cif' }))} className={inputClass}>
+                        <option value="fob">FOB (véhicule seul au port de Chine)</option>
+                        <option value="cif">CIF (transport inclus)</option>
+                      </select>
+                    </div>
+                    {/* Destination country (only for CIF) */}
+                    {form.price_type === 'cif' && (
+                      <div>
+                        <label className={labelClass}>Pays de destination</label>
+                        <input type="text" value={form.destination_country} onChange={e => setForm(f => ({ ...f, destination_country: e.target.value }))} className={inputClass} placeholder="ex: Burkina Faso" />
+                      </div>
+                    )}
                     {/* Mileage */}
                     <div>
                       <label className={labelClass}>Kilometrage</label>

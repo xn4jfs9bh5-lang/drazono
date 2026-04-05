@@ -15,7 +15,7 @@ import {
   Calendar, Gauge, Fuel, Cog, Zap, Palette,
   Users, DoorOpen, Car, AlertTriangle, ChevronLeft,
   ChevronRight, X, Eye, Shield, Camera, Check,
-  Copy, Clock, BadgeCheck, ChevronDown, Home
+  Copy, Clock, BadgeCheck, Home
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -25,43 +25,6 @@ import { toast } from 'sonner'
 function fmt(n: number) { return new Intl.NumberFormat('fr-FR').format(Math.round(n)) }
 
 // ---------------------------------------------------------------------------
-// Customs duty data per country (2024 official rates)
-// ---------------------------------------------------------------------------
-interface CountryDuty {
-  name: string
-  region: 'west-africa' | 'europe' | 'canada'
-  transport: number
-  dutyRate: number
-  vatRate: number
-  otherRate: number
-  isFcfa: boolean
-}
-
-const COUNTRIES: CountryDuty[] = [
-  { name: 'Burkina Faso', region: 'west-africa', transport: 1500, dutyRate: 0.20, vatRate: 0.18, otherRate: 0.01, isFcfa: true },
-  { name: 'Sénégal', region: 'west-africa', transport: 1450, dutyRate: 0.20, vatRate: 0.18, otherRate: 0.023, isFcfa: true },
-  { name: 'Côte d\'Ivoire', region: 'west-africa', transport: 1450, dutyRate: 0.20, vatRate: 0.18, otherRate: 0.023, isFcfa: true },
-  { name: 'Mali', region: 'west-africa', transport: 1550, dutyRate: 0.20, vatRate: 0.18, otherRate: 0.01, isFcfa: true },
-  { name: 'Bénin', region: 'west-africa', transport: 1400, dutyRate: 0.20, vatRate: 0.18, otherRate: 0.01, isFcfa: true },
-  { name: 'Togo', region: 'west-africa', transport: 1400, dutyRate: 0.20, vatRate: 0.18, otherRate: 0.00, isFcfa: true },
-  { name: 'Niger', region: 'west-africa', transport: 1600, dutyRate: 0.20, vatRate: 0.19, otherRate: 0.01, isFcfa: true },
-  { name: 'France', region: 'europe', transport: 1100, dutyRate: 0.065, vatRate: 0.20, otherRate: 0.00, isFcfa: false },
-  { name: 'Belgique', region: 'europe', transport: 1100, dutyRate: 0.065, vatRate: 0.21, otherRate: 0.00, isFcfa: false },
-  { name: 'Canada', region: 'canada', transport: 2000, dutyRate: 0.061, vatRate: 0.05, otherRate: 0.09, isFcfa: false },
-]
-
-function calcDuty(priceEur: number, country: CountryDuty) {
-  const transport = country.transport
-  const insurance = priceEur * 0.02
-  const cif = priceEur + transport + insurance
-  const duty = cif * country.dutyRate
-  const vat = (cif + duty) * country.vatRate
-  const other = cif * country.otherRate
-  const totalTaxes = duty + vat + other
-  const total = priceEur + transport + insurance + totalTaxes
-  return { transport, insurance, cif, duty, vat, other, totalTaxes, total }
-}
-
 // ---------------------------------------------------------------------------
 // Main page
 // ---------------------------------------------------------------------------
@@ -73,7 +36,6 @@ export default function VehiclePage() {
   const [activeImage, setActiveImage] = useState(0)
   const [lightbox, setLightbox] = useState(false)
   const [viewers, setViewers] = useState(0)
-  const [countryIdx, setCountryIdx] = useState(0)
   const [showSticky, setShowSticky] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
 
@@ -164,9 +126,6 @@ export default function VehiclePage() {
   }
 
   const images = vehicle.images?.length ? vehicle.images : []
-  const country = COUNTRIES[countryIdx]
-  const dutyCalc = calcDuty(vehicle.price_eur, country)
-
   const waBase = `https://wa.me/${WHATSAPP_NUMBER}?text=`
   const waMessages = [
     { label: 'Je veux plus de détails', icon: MessageCircle, style: 'bg-[#25D366] hover:bg-[#20BA5C] text-white font-bold text-base',
@@ -331,12 +290,22 @@ export default function VehiclePage() {
                 </p>
               </div>
 
-              {/* Transport notice */}
-              <div className="mt-5 p-4 bg-blue-50/70 rounded-xl border border-blue-100">
-                <p className="text-sm text-blue-800">
-                  Transport en option — contactez-nous pour un devis personnalisé
-                </p>
-              </div>
+              {/* Price type notice */}
+              {vehicle.price_type === 'cif' && vehicle.destination_country ? (
+                <div className="mt-5 p-4 bg-emerald-50/70 rounded-xl border border-emerald-100">
+                  <p className="text-sm text-emerald-800 flex items-center gap-2">
+                    <Check className="w-4 h-4 shrink-0" />
+                    Prix tout compris — Transport inclus vers {vehicle.destination_country}
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-5 p-4 bg-blue-50/70 rounded-xl border border-blue-100">
+                  <p className="text-sm text-blue-800 flex items-center gap-2">
+                    <Ship className="w-4 h-4 shrink-0" />
+                    Prix FOB — Transport en option
+                  </p>
+                </div>
+              )}
 
               {/* WhatsApp CTAs */}
               <div className="mt-5 space-y-2.5">
@@ -446,51 +415,24 @@ export default function VehiclePage() {
           </FadeIn>
         )}
 
-        {/* ==================== COST CALCULATOR ==================== */}
-        <FadeIn delay={0.25}>
-          <div className="mt-12">
-            <h2 className="text-xl font-bold text-[#111827] tracking-[-0.02em]">Estimez le coût total</h2>
-            <span className="section-title-line !mx-0 !mt-2 !mb-6" />
-            <div className="bg-white rounded-2xl border border-gray-100 p-5 sm:p-6 shadow-sm">
-              <div className="mb-5">
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Pays de destination</label>
-                <div className="relative">
-                  <select value={countryIdx} onChange={e => setCountryIdx(Number(e.target.value))} className="w-full sm:w-72 h-11 rounded-lg border border-gray-200 px-4 pr-10 text-sm bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-brand-500">
-                    {COUNTRIES.map((c, i) => <option key={i} value={i}>{c.name}</option>)}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
+        {/* ==================== TRANSPORT CTA ==================== */}
+        {vehicle.price_type !== 'cif' && (
+          <FadeIn delay={0.25}>
+            <div className="mt-12">
+              <div className="bg-white rounded-2xl border border-gray-100 p-5 sm:p-6 shadow-sm text-center">
+                <Ship className="w-8 h-8 text-brand-500 mx-auto mb-3" />
+                <h2 className="text-lg font-bold text-[#111827] mb-2">Besoin d&apos;un devis transport ?</h2>
+                <p className="text-sm text-gray-600 mb-5 max-w-md mx-auto">
+                  Ce prix est FOB (au port de Chine). Contactez-nous pour un devis transport et douane personnalisé vers votre pays.
+                </p>
+                <a href={`${waBase}${encodeURIComponent(`Bonjour, je souhaite un devis transport pour le ${vehicle.brand} ${vehicle.model} ${vehicle.year}. Merci !`)}`} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 h-12 px-6 bg-[#25D366] hover:bg-[#20BD5A] text-white rounded-xl font-medium text-sm transition-colors">
+                  <MessageCircle className="w-5 h-5" /> Demander un devis transport
+                </a>
               </div>
-
-              <div className="space-y-2.5 text-sm">
-                <div className="flex justify-between"><span className="text-gray-600">Prix véhicule</span><span className="font-medium text-[#111827]">{fmt(vehicle.price_eur)} &euro;</span></div>
-                <div className="flex justify-between"><span className="text-gray-600">Transport estimé ({country.region === 'west-africa' ? 'Afrique' : country.region === 'europe' ? 'Europe' : 'Canada'})</span><span className="font-medium text-[#111827]">{fmt(dutyCalc.transport)} &euro;</span></div>
-                <div className="flex justify-between"><span className="text-gray-600">Assurance transport (~2%)</span><span className="font-medium text-[#111827]">{fmt(dutyCalc.insurance)} &euro;</span></div>
-                <div className="border-t border-gray-100 pt-2.5" />
-                <div className="flex justify-between"><span className="text-gray-600">Droits de douane ({Math.round(country.dutyRate * 100)}%)</span><span className="font-medium text-[#111827]">{fmt(dutyCalc.duty)} &euro;</span></div>
-                <div className="flex justify-between"><span className="text-gray-600">TVA ({Math.round(country.vatRate * 100)}%)</span><span className="font-medium text-[#111827]">{fmt(dutyCalc.vat)} &euro;</span></div>
-                {country.otherRate > 0 && <div className="flex justify-between"><span className="text-gray-600">Autres taxes ({(country.otherRate * 100).toFixed(1)}%)</span><span className="font-medium text-[#111827]">{fmt(dutyCalc.other)} &euro;</span></div>}
-                <div className="border-t border-gray-200 pt-3 mt-1" />
-                <div className="flex justify-between items-end">
-                  <span className="font-semibold text-[#111827] text-base">Total estimé</span>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-brand-500">{fmt(dutyCalc.total)} &euro;</p>
-                    {country.isFcfa && <p className="text-sm text-gray-600">≈ {fmt(dutyCalc.total * EUR_TO_FCFA)} FCFA</p>}
-                  </div>
-                </div>
-              </div>
-
-              <a href={`${waBase}${encodeURIComponent(`Bonjour, je souhaite un devis précis pour le ${vehicle.brand} ${vehicle.model} ${vehicle.year} livré au ${country.name}. Merci !`)}`} target="_blank" rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full h-12 mt-5 bg-[#25D366] hover:bg-[#20BD5A] text-white rounded-xl font-medium text-sm transition-colors">
-                <MessageCircle className="w-5 h-5" /> Obtenir un devis précis sur WhatsApp
-              </a>
-
-              <p className="text-[11px] text-gray-400 mt-3 leading-relaxed">
-                Estimations indicatives basées sur les taux officiels 2024. Le montant réel peut varier selon l&apos;état du véhicule, sa valeur déclarée, les frais de commissionnaire en douane et les réglementations locales. Contactez-nous pour un devis précis et personnalisé.
-              </p>
             </div>
-          </div>
-        </FadeIn>
+          </FadeIn>
+        )}
 
         {/* ==================== WHY DRAZONO ==================== */}
         <FadeIn delay={0.28}>

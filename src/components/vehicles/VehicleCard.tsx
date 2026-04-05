@@ -195,7 +195,11 @@ export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
             <p className="text-sm font-semibold text-amber-600">
               ≈ {formatPrice(vehicle.price_fcfa || vehicle.price_eur * EUR_TO_FCFA)} FCFA
             </p>
-            <p className="text-xs text-gray-500 italic mt-0.5">+ Transport + Douane</p>
+            {vehicle.price_type === 'cif' ? (
+              <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 mt-1">Transport inclus</span>
+            ) : (
+              <span className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 border border-gray-200 mt-1">FOB</span>
+            )}
           </div>
 
           <div className="flex items-center gap-3 mt-3 text-xs text-gray-600">

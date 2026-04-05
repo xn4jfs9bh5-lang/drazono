@@ -21,6 +21,8 @@ export interface Vehicle {
   featured: boolean
   verified: boolean
   video_url: string | null
+  price_type: 'fob' | 'cif'
+  destination_country: string | null
   created_at: string
   updated_at: string
 }
